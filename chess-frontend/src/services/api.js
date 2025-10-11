@@ -7,6 +7,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: false, // Set to true if your API uses cookies for authentication
 });
 
 // Add token to requests if it exists
@@ -41,7 +42,12 @@ export const getModelById = async (modelId) => {
 };
 
 export const createModel = async (modelData) => {
-  const response = await api.post('/models', modelData);
+  // Ensure we're using the right URL and content type
+  const response = await api.post('/models', modelData, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
   return response.data;
 };
 

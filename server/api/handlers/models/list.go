@@ -2,6 +2,7 @@ package models
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,13 +11,21 @@ import (
 func (h *Handler) GetModelsByUserID(c *gin.Context) {
 	// Get user ID from URL params
 	userID := c.Param("userId")
-	if userID == "" {
+
+	// Convert userID to int
+	userIDInt, err := strconv.Atoi(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	if userIDInt == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
 		return
 	}
 
 	// Get models from service
-	models, err := h.modelService.GetModelsByUserID(userID)
+	models, err := h.modelService.GetModelsByUserID(userIDInt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve models: " + err.Error()})
 		return

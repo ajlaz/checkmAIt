@@ -33,6 +33,6 @@ func (h *Handler) registerRoutes() {
 	{
 		modelGroup.GET("/:id", h.GetModelByID)
 		modelGroup.GET("/user/:userId", h.GetModelsByUserID)
-		modelGroup.POST("/", h.CreateModel)
+		modelGroup.POST("", h.CreateModel)  // Remove trailing slash to avoid redirects
 	}
 }

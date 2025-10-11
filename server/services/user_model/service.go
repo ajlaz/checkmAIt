@@ -7,11 +7,11 @@ import (
 
 // ServiceInterface defines the contract for user model service
 type ServiceInterface interface {
-	CreateModel(userID, name, modelCode string) (*model.UserModel, error)
-	GetModelByID(modelID string) (*model.UserModel, error)
-	GetModelsByUserID(userID string) ([]*model.UserModel, error)
-	UpdateModel(modelID, name, modelCode string) (*model.UserModel, error)
-	DeleteModel(modelID string) error
+	CreateModel(userID int, name, modelCode string) (*model.UserModel, error)
+	GetModelByID(modelID int) (*model.UserModel, error)
+	GetModelsByUserID(userID int) ([]*model.UserModel, error)
+	UpdateModel(modelID int, name, modelCode string) (*model.UserModel, error)
+	DeleteModel(modelID int) error
 }
 
 // Service implements the user model service

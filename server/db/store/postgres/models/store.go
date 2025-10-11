@@ -8,10 +8,10 @@ import (
 // StoreInterface defines the contract for user model data access
 type StoreInterface interface {
 	CreateModel(model *model.UserModel) (*model.UserModel, error)
-	GetModelByID(id string) (*model.UserModel, error)
-	GetModelsByUserID(userID string) ([]*model.UserModel, error)
+	GetModelByID(id int) (*model.UserModel, error)
+	GetModelsByUserID(userID int) ([]*model.UserModel, error)
 	UpdateModel(model *model.UserModel) (*model.UserModel, error)
-	DeleteModel(id string) error
+	DeleteModel(id int) error
 }
 
 // Store implements the user model data access

@@ -7,7 +7,7 @@ import (
 )
 
 type CreateModelRequest struct {
-	UserID string `json:"user_id" binding:"required"`
+	UserID int    `json:"user_id" binding:"required"`
 	Name   string `json:"name" binding:"required"`
 	Model  string `json:"model" binding:"required"`
 }

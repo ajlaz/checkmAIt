@@ -33,7 +33,7 @@ func (s *Store) CreateModel(m *model.UserModel) (*model.UserModel, error) {
 }
 
 // GetModelByID retrieves a model by its ID
-func (s *Store) GetModelByID(id string) (*model.UserModel, error) {
+func (s *Store) GetModelByID(id int) (*model.UserModel, error) {
 	query := `
 		SELECT id, user_id, name, model, rating 
 		FROM user_models 
@@ -55,7 +55,7 @@ func (s *Store) GetModelByID(id string) (*model.UserModel, error) {
 }
 
 // GetModelsByUserID retrieves all models for a specific user
-func (s *Store) GetModelsByUserID(userID string) ([]*model.UserModel, error) {
+func (s *Store) GetModelsByUserID(userID int) ([]*model.UserModel, error) {
 	query := `
 		SELECT id, user_id, name, model, rating 
 		FROM user_models 
@@ -108,7 +108,7 @@ func (s *Store) UpdateModel(m *model.UserModel) (*model.UserModel, error) {
 }
 
 // DeleteModel deletes a model by ID
-func (s *Store) DeleteModel(id string) error {
+func (s *Store) DeleteModel(id int) error {
 	query := `DELETE FROM user_models WHERE id = $1`
 
 	result, err := s.DB.Exec(query, id)

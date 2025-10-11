@@ -7,7 +7,7 @@ import (
 )
 
 // CreateModel creates a new chess model
-func (s *Service) CreateModel(userID, name, modelCode string) (*model.UserModel, error) {
+func (s *Service) CreateModel(userID int, name, modelCode string) (*model.UserModel, error) {
 	// Validate the model code (you may want to add more specific validation)
 	if modelCode == "" {
 		return nil, errors.New("model code cannot be empty")
@@ -26,8 +26,8 @@ func (s *Service) CreateModel(userID, name, modelCode string) (*model.UserModel,
 }
 
 // GetModelByID retrieves a model by its ID
-func (s *Service) GetModelByID(modelID string) (*model.UserModel, error) {
-	if modelID == "" {
+func (s *Service) GetModelByID(modelID int) (*model.UserModel, error) {
+	if modelID == 0 {
 		return nil, errors.New("model ID cannot be empty")
 	}
 
@@ -40,8 +40,8 @@ func (s *Service) GetModelByID(modelID string) (*model.UserModel, error) {
 }
 
 // GetModelsByUserID retrieves all models for a specific user
-func (s *Service) GetModelsByUserID(userID string) ([]*model.UserModel, error) {
-	if userID == "" {
+func (s *Service) GetModelsByUserID(userID int) ([]*model.UserModel, error) {
+	if userID == 0 {
 		return nil, errors.New("user ID cannot be empty")
 	}
 
@@ -56,8 +56,8 @@ func (s *Service) GetModelsByUserID(userID string) ([]*model.UserModel, error) {
 }
 
 // UpdateModel updates an existing model
-func (s *Service) UpdateModel(modelID, name, modelCode string) (*model.UserModel, error) {
-	if modelID == "" {
+func (s *Service) UpdateModel(modelID int, name, modelCode string) (*model.UserModel, error) {
+	if modelID == 0 {
 		return nil, errors.New("model ID cannot be empty")
 	}
 
@@ -85,8 +85,8 @@ func (s *Service) UpdateModel(modelID, name, modelCode string) (*model.UserModel
 }
 
 // DeleteModel deletes a model by ID
-func (s *Service) DeleteModel(modelID string) error {
-	if modelID == "" {
+func (s *Service) DeleteModel(modelID int) error {
+	if modelID == 0 {
 		return errors.New("model ID cannot be empty")
 	}
 
