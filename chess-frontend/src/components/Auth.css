@@ -3,7 +3,7 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-width: 85vw;
 }
 
 .auth-card {
@@ -70,6 +70,6 @@
 
 .error {
   color: #e74c3c;
-  font-size: 0.875rem;
+  font-size: .875rem;
   text-align: center;
 }

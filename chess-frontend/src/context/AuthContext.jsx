@@ -31,11 +31,16 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await apiLogin(email, password);
+      console.log('Login response:', response);
+      console.log('User object:', response.user);
+      console.log('User ID:', response.user?.id);
+      console.log('User ID (capital):', response.user?.ID);
       if (response.token && response.user) {
         setToken(response.token);
         setUser(response.user);
         localStorage.setItem('token', response.token);
         localStorage.setItem('user', JSON.stringify(response.user));
+        console.log('Stored in localStorage:', localStorage.getItem('user'));
         return { success: true };
       }
       return { success: false, error: 'Invalid response from server' };
@@ -50,11 +55,16 @@ export const AuthProvider = ({ children }) => {
   const register = async (username, email, password) => {
     try {
       const response = await apiRegister(username, email, password);
+      console.log('Register response:', response);
+      console.log('User object:', response.user);
+      console.log('User ID:', response.user?.id);
+      console.log('User ID (capital):', response.user?.ID);
       if (response.token && response.user) {
         setToken(response.token);
         setUser(response.user);
         localStorage.setItem('token', response.token);
         localStorage.setItem('user', JSON.stringify(response.user));
+        console.log('Stored in localStorage:', localStorage.getItem('user'));
         return { success: true };
       }
       return { success: false, error: 'Invalid response from server' };
