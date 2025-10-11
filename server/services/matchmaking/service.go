@@ -15,13 +15,15 @@ type Player struct {
 
 // Match represents a pairing between two players
 type Match struct {
-	ID        string    `json:"id"`
-	Player1   Player    `json:"player1"`
-	Player2   Player    `json:"player2"`
-	GameID    string    `json:"gameId"`
-	WSPort    int       `json:"wsPort"`
-	CreatedAt time.Time `json:"createdAt"`
-	Status    string    `json:"status"` // "waiting", "matched", "in_progress", "completed", "error"
+	ID           string    `json:"id"`
+	Player1      Player    `json:"player1"`
+	Player2      Player    `json:"player2"`
+	GameID       string    `json:"gameId"`
+	WSPort       int       `json:"wsPort"`
+	WhitePlayer  string    `json:"whitePlayer"`  // UserID of white player
+	BlackPlayer  string    `json:"blackPlayer"`  // UserID of black player
+	CreatedAt    time.Time `json:"createdAt"`
+	Status       string    `json:"status"` // "waiting", "matched", "in_progress", "completed", "error"
 }
 
 // ServiceInterface defines the contract for the matchmaking service

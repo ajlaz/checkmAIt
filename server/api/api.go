@@ -18,6 +18,9 @@ func New(cfg *config.Config) *API {
 		jwtSecret:   cfg.Auth.JWTSecret,
 	}
 
+	// Add CORS middleware
+	api.Use(CORSMiddleware())
+
 	api.RegisterDefaultRoutes()
 
 	return api

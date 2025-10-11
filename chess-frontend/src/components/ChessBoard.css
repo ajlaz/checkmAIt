@@ -1,0 +1,77 @@
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+}
+
+.game-info {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.game-info h2 {
+  margin: 0 0 1rem 0;
+  color: #333;
+}
+
+.game-info p {
+  margin: 0.5rem 0;
+  color: #666;
+}
+
+.your-turn {
+  color: #27ae60 !important;
+  font-weight: bold;
+}
+
+.game-status, .game-error {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.game-error h2 {
+  color: #e74c3c;
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  background: #e74c3c;
+  color: white;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.game-over {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.game-over h2 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.board-wrapper {
+  max-width: 600px;
+  width: 100%;
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}

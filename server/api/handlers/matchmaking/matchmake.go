@@ -11,11 +11,12 @@ type JoinQueueRequest struct {
 }
 
 type QueueStatusResponse struct {
-	Status       string `json:"status"` // "queued", "matched"
+	Status        string `json:"status"` // "queued", "matched"
 	QueuePosition int    `json:"queuePosition,omitempty"`
-	GameID       string `json:"gameId,omitempty"`
-	WSPort       int    `json:"wsPort,omitempty"`
-	MatchID      string `json:"matchId,omitempty"`
+	GameID        string `json:"gameId,omitempty"`
+	WSPort        int    `json:"wsPort,omitempty"`
+	MatchID       string `json:"matchId,omitempty"`
+	PlayerColor   string `json:"playerColor,omitempty"` // "white" or "black"
 }
 
 func (h *Handler) JoinQueue(c *gin.Context) {
@@ -64,11 +65,18 @@ func (h *Handler) JoinQueue(c *gin.Context) {
 	}
 
 	// User was matched immediately
+	// Determine player color
+	playerColor := "white"
+	if match.BlackPlayer == userID {
+		playerColor = "black"
+	}
+
 	c.JSON(http.StatusOK, QueueStatusResponse{
-		Status:  "matched",
-		GameID:  match.GameID,
-		WSPort:  match.WSPort,
-		MatchID: match.ID,
+		Status:      "matched",
+		GameID:      match.GameID,
+		WSPort:      match.WSPort,
+		MatchID:     match.ID,
+		PlayerColor: playerColor,
 	})
 }
 
@@ -134,11 +142,18 @@ func (h *Handler) GetQueueStatus(c *gin.Context) {
 
 	// If match exists, return match details
 	if match != nil {
+		// Determine player color
+		playerColor := "white"
+		if match.BlackPlayer == userID {
+			playerColor = "black"
+		}
+
 		c.JSON(http.StatusOK, QueueStatusResponse{
-			Status:  "matched",
-			GameID:  match.GameID,
-			WSPort:  match.WSPort,
-			MatchID: match.ID,
+			Status:      "matched",
+			GameID:      match.GameID,
+			WSPort:      match.WSPort,
+			MatchID:     match.ID,
+			PlayerColor: playerColor,
 		})
 		return
 	}

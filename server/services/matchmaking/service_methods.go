@@ -3,6 +3,7 @@ package matchmaking
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"time"
 )
 
@@ -61,11 +62,25 @@ func (s *Service) AddToQueue(userID, modelID string) (*Match, error) {
 		player1.MatchedAt = &now
 		player2.MatchedAt = &now
 
+		// Randomly assign colors
+		var whitePlayerID, whiteModelID, blackPlayerID, blackModelID string
+		if rand.Intn(2) == 0 {
+			whitePlayerID = player1.UserID
+			whiteModelID = player1.ModelID
+			blackPlayerID = player2.UserID
+			blackModelID = player2.ModelID
+		} else {
+			whitePlayerID = player2.UserID
+			whiteModelID = player2.ModelID
+			blackPlayerID = player1.UserID
+			blackModelID = player1.ModelID
+		}
+
 		// Create a game via engine service
 		returnedGameID, wsPort, err := s.engineService.CreateGame(
 			gameID,
-			player1.UserID, player1.ModelID,
-			player2.UserID, player2.ModelID,
+			whitePlayerID, whiteModelID,
+			blackPlayerID, blackModelID,
 		)
 		
 		if err != nil {
@@ -76,13 +91,15 @@ func (s *Service) AddToQueue(userID, modelID string) (*Match, error) {
 
 		// Create and store the match
 		match := &Match{
-			ID:        matchID,
-			Player1:   player1,
-			Player2:   player2,
-			GameID:    returnedGameID,
-			WSPort:    wsPort,
-			CreatedAt: now,
-			Status:    "matched",
+			ID:          matchID,
+			Player1:     player1,
+			Player2:     player2,
+			GameID:      returnedGameID,
+			WSPort:      wsPort,
+			WhitePlayer: whitePlayerID,
+			BlackPlayer: blackPlayerID,
+			CreatedAt:   now,
+			Status:      "matched",
 		}
 		s.matches[matchID] = match
 		

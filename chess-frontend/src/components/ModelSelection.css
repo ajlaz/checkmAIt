@@ -1,0 +1,147 @@
+.model-selection-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1rem;
+}
+
+.model-selection-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.header h2 {
+  color: #333;
+  margin: 0;
+}
+
+.logout-btn {
+  padding: 0.5rem 1rem;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #c0392b;
+}
+
+.loading, .error, .no-models {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.error {
+  color: #e74c3c;
+}
+
+.models-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.model-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.model-item:hover {
+  border-color: #667eea;
+  background: #f8f9ff;
+}
+
+.model-item.selected {
+  border-color: #667eea;
+  background: #e8ecff;
+}
+
+.model-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+}
+
+.model-info p {
+  margin: 0;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.checkmark {
+  color: #667eea;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.continue-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.continue-btn:hover:not(:disabled) {
+  background: #5568d3;
+}
+
+.continue-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.create-model-btn {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.create-model-btn:hover {
+  background: #5568d3;
+}
+
+.no-models {
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.no-models p {
+  margin-bottom: 1rem;
+  color: #666;
+  font-size: 1rem;
+}
