@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS models (
+CREATE TABLE IF NOT EXISTS model (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id),
     model TEXT NOT NULL,
@@ -21,6 +21,6 @@ CREATE TABLE IF NOT EXISTS models (
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE IF EXISTS models;
+DROP TABLE IF EXISTS model;
 DROP TABLE IF EXISTS users;
 -- +goose StatementEnd

@@ -1,12 +1,14 @@
 package users
 
 import (
-	"github.com/ajlaz/checkmAIt/server/models"
+	"github.com/ajlaz/checkmAIt/server/model"
 	"github.com/jmoiron/sqlx"
 )
 
 type StoreInterface interface {
-	GetUserByID(id int64) (*models.User, error)
+	GetUserByID(id string) (*model.User, error)
+	GetUserByEmail(email string) (*model.User, error)
+	CreateUser(user *model.User) (*model.User, error)
 }
 
 type Store struct {

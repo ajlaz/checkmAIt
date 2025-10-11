@@ -1,8 +1,8 @@
 package user
 
-import "github.com/ajlaz/checkmAIt/server/models"
+import "github.com/ajlaz/checkmAIt/server/model"
 
-func (s *Service) GetUserByID(id int64) (*models.User, error) {
+func (s *Service) GetUserByID(id string) (*model.User, error) {
 
 	return s.userStore.GetUserByID(id)
 }

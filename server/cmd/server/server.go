@@ -31,7 +31,7 @@ func Run() {
 	store := initStore(cfg)
 	services := services.NewServices(store.user_store)
 
-	a := api.New()
+	a := api.New(cfg)
 	// initialize handlers
 	_ = users.NewHandler(a, services.UserService)
 

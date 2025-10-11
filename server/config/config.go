@@ -5,6 +5,7 @@ import "github.com/joho/godotenv"
 type Config struct {
 	Postgres PostgresConfig
 	HTTP     HTTPConfig
+	Auth     AuthConfig
 }
 
 var env map[string]string
@@ -27,6 +28,9 @@ func LoadConfig() (*Config, error) {
 			Host: env["HTTP_HOST"],
 			Port: env["HTTP_PORT"],
 		},
+		Auth: AuthConfig{
+			JWTSecret: env["JWT_SECRET"],
+		},
 	}
 
 	return config, nil
@@ -42,4 +46,8 @@ type PostgresConfig struct {
 type HTTPConfig struct {
 	Host string
 	Port string
+}
+
+type AuthConfig struct {
+	JWTSecret string
 }
