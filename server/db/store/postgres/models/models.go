@@ -65,7 +65,7 @@ func (s *Store) GetModelsByUserID(userID string) ([]*model.UserModel, error) {
 	var models []*model.UserModel
 	err := s.DB.Select(&models, query, userID)
 
-	if err != nil {
+	if err != sql.ErrNoRows && err != nil {
 		// Return error only for actual DB errors, not for "no rows" cases
 		return nil, fmt.Errorf("failed to get models for user: %w", err)
 	}

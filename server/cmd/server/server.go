@@ -8,6 +8,7 @@ import (
 
 	"github.com/ajlaz/checkmAIt/server/api"
 	"github.com/ajlaz/checkmAIt/server/api/handlers/matchmaking"
+	"github.com/ajlaz/checkmAIt/server/api/handlers/models"
 	"github.com/ajlaz/checkmAIt/server/api/handlers/users"
 	"github.com/ajlaz/checkmAIt/server/config"
 	"github.com/ajlaz/checkmAIt/server/server"
@@ -31,11 +32,12 @@ func Run() {
 
 	store := initStore(cfg)
 
-	services := services.NewServices(store.user_store, cfg.Engine.URL)
+	services := services.NewServices(store.user_store, store.model_store, cfg.Engine.URL)
 
 	a := api.New(cfg)
 	// initialize handlers
 	_ = users.NewHandler(a, services.UserService)
+	_ = models.NewHandler(a, services.UserService, services.ModelService)
 	_ = matchmaking.NewHandler(a, *services)
 
 	idleConnsClosed := make(chan struct{})
