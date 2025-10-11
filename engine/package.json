@@ -12,7 +12,12 @@
     "test:watch": "jest --watch --testPathIgnorePatterns=test/integration",
     "test:coverage": "jest --coverage --testPathIgnorePatterns=test/integration",
     "test:integration": "jest --testMatch='**/test/integration/**/*.test.ts' --runInBand --silent",
-    "test:all": "npm run test && npm run test:integration"
+    "test:all": "npm run test && npm run test:integration",
+    "docker:build": "docker build -t checkmait-engine .",
+    "docker:run": "docker run -p 3000:3000 -p 9000-9010:9000-9010 checkmait-engine",
+    "docker:up": "docker-compose up",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
   },
   "keywords": [
     "chess",
