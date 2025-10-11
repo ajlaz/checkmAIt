@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/ajlaz/checkmAIt/server/api"
+	"github.com/ajlaz/checkmAIt/server/api/handlers/matchmaking"
 	"github.com/ajlaz/checkmAIt/server/api/handlers/users"
 	"github.com/ajlaz/checkmAIt/server/config"
 	"github.com/ajlaz/checkmAIt/server/server"
@@ -29,11 +30,13 @@ func Run() {
 	srv := server.New(cfg)
 
 	store := initStore(cfg)
-	services := services.NewServices(store.user_store)
+
+	services := services.NewServices(store.user_store, cfg.Engine.URL)
 
 	a := api.New(cfg)
 	// initialize handlers
 	_ = users.NewHandler(a, services.UserService)
+	_ = matchmaking.NewHandler(a, *services)
 
 	idleConnsClosed := make(chan struct{})
 	// gracefully shutdown the server on os.interrupt signal

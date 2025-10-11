@@ -6,6 +6,7 @@ type Config struct {
 	Postgres PostgresConfig
 	HTTP     HTTPConfig
 	Auth     AuthConfig
+	Engine   EngineConfig
 }
 
 var env map[string]string
@@ -31,6 +32,9 @@ func LoadConfig() (*Config, error) {
 		Auth: AuthConfig{
 			JWTSecret: env["JWT_SECRET"],
 		},
+		Engine: EngineConfig{
+			URL: env["ENGINE_URL"],
+		},
 	}
 
 	return config, nil
@@ -50,4 +54,8 @@ type HTTPConfig struct {
 
 type AuthConfig struct {
 	JWTSecret string
+}
+
+type EngineConfig struct {
+	URL string
 }
