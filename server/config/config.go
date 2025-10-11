@@ -20,6 +20,7 @@ func LoadConfig() (*Config, error) {
 
 	config := &Config{
 		Postgres: PostgresConfig{
+			Host:     env["POSTGRES_HOST"],
 			User:     env["POSTGRES_USER"],
 			Password: env["POSTGRES_PASSWORD"],
 			DB:       env["POSTGRES_DB"],
@@ -41,6 +42,7 @@ func LoadConfig() (*Config, error) {
 }
 
 type PostgresConfig struct {
+	Host     string
 	User     string
 	Password string
 	DB       string

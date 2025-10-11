@@ -1,0 +1,24 @@
+# Git files
+.git
+.gitignore
+
+# Editor files
+.vscode
+.idea
+
+# Build artifacts
+bin
+vendor
+
+# Docker files
+Dockerfile
+docker-compose.yml
+
+# Local environment files
+.env
+*.log
+
+# Unnecessary files
+*.md
+LICENSE
+tests/

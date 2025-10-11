@@ -1,0 +1,128 @@
+version: '3.8'
+
+services:
+  # Go backend server
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - HTTP_HOST=0.0.0.0
+      - HTTP_PORT=8080
+      - JWT_SECRET=${JWT_SECRET:-change_this_in_production}
+      - ENGINE_URL=http://engine:3000
+    command: ./server serve
+    depends_on:
+      postgres:
+        condition: service_healthy
+      server-migration:
+        condition: service_completed_successfully
+      engine:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - checkmait-network
+    volumes:
+      - server-data:/app/data
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - checkmait-network
+
+  # Database migration service
+  server-migration:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_HOST=postgres  # This must match the service name
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - HTTP_HOST=0.0.0.0
+      - HTTP_PORT=8080
+      - JWT_SECRET=${JWT_SECRET:-change_this_in_production}
+    # Use a script to wait for Postgres to be ready and then run migrations
+    command: >
+      sh -c '
+        echo "Waiting for Postgres to be ready..."
+        until nc -z postgres 5432; do
+          sleep 1
+        done
+        echo "Postgres is ready. Running migrations..."
+        ./server migrate up
+      '
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - checkmait-network
+    restart: "no"
+    deploy:
+      restart_policy:
+        condition: none
+
+  # Chess engine service
+  engine:
+    build:
+      context: ./engine
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"      # HTTP API
+      - "9000-9010:9000-9010"  # WebSocket ports for game connections
+    environment:
+      - NODE_ENV=production
+      - HTTP_PORT=3000
+      - WS_BASE_PORT=9000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - checkmait-network
+
+# Shared volumes for data persistence
+volumes:
+  postgres_data:
+    driver: local
+  server-data:
+    driver: local
+
+# Create a dedicated network for all services
+networks:
+  checkmait-network:
+    driver: bridge
