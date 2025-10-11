@@ -47,9 +47,11 @@ func (s *Service) GetModelsByUserID(userID string) ([]*model.UserModel, error) {
 
 	models, err := s.modelStore.GetModelsByUserID(userID)
 	if err != nil {
+		// If there's a database error, propagate it
 		return nil, err
 	}
 
+	// Always return the models array, which will be empty if no models found
 	return models, nil
 }
 

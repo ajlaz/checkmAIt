@@ -22,7 +22,7 @@ func (h *Handler) GetModelsByUserID(c *gin.Context) {
 		return
 	}
 
-	// Return the models
+	// Return the models (will be empty array if no models found)
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"count":   len(models),
