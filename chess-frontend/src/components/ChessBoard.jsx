@@ -8,21 +8,25 @@ import './ChessBoard.css';
 
 function ChessBoard({ gameData, onGameEnd, botCode }) {
   const { user } = useAuth();
-  const chessGameRef = useRef(new Chess());
-  const chessGame = chessGameRef.current;
-  const [chessPosition, setChessPosition] = useState(chessGame.fen());
+
+  // State
+  const [position, setPosition] = useState('start');
   const [currentTurn, setCurrentTurn] = useState('white');
   const [gameOver, setGameOver] = useState(false);
   const [gameResult, setGameResult] = useState(null);
-  const [connectionStatus, setConnectionStatus] = useState('connecting');
-  const [errorMessage, setErrorMessage] = useState('');
   const [isBotThinking, setIsBotThinking] = useState(false);
   const [moveHistory, setMoveHistory] = useState([]);
-  const lastMoveTimeRef = useRef(0);
-  const autoPlayIntervalRef = useRef(null);
-  const isMyTurnRef = useRef(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
+  // Refs
+  const chessRef = useRef(new Chess());
+  const lastMoveTimeRef = useRef(0);
+  const processingMoveRef = useRef(false);
+
+  // Connect to game WebSocket
   useEffect(() => {
+    let mounted = true;
+
     const connectToGame = async () => {
       try {
         await gameSocket.connect(
@@ -31,74 +35,70 @@ function ChessBoard({ gameData, onGameEnd, botCode }) {
           user.id,
           gameData.playerColor
         );
-        setConnectionStatus('connected');
 
-        // Set up message handlers
+        // Handle connection confirmation
         gameSocket.on('connection', (data) => {
-          console.log('Connected to game:', data);
-          console.log('My assigned color:', gameData.playerColor, 'Current turn:', data.currentTurn);
-          chessGame.load(data.boardState);
-          setChessPosition(data.boardState);
+          console.log(`[${gameData.playerColor}] Connected:`, data);
+          setPosition(data.boardState);
           setCurrentTurn(data.currentTurn);
-          isMyTurnRef.current = data.currentTurn === gameData.playerColor;
-          console.log('Is it my turn after connection?', isMyTurnRef.current);
+          chessRef.current.load(data.boardState);
         });
 
+        // Handle board state updates (opponent moved)
         gameSocket.on('board_state', (data) => {
-          console.log('Board state update:', data);
-          chessGame.load(data.boardState);
-          setChessPosition(data.boardState);
+          console.log(`[${gameData.playerColor}] Board state:`, data);
+          setPosition(data.boardState);
           setCurrentTurn(data.currentTurn);
-          isMyTurnRef.current = data.currentTurn === gameData.playerColor;
+          chessRef.current.load(data.boardState);
         });
 
+        // Handle move response (our move was processed)
         gameSocket.on('move', (data) => {
-          console.log('Move response:', data);
+          console.log(`[${gameData.playerColor}] Move response:`, data);
+
           if (data.success && data.boardState) {
-            console.log('Updating board position to:', data.boardState);
-            chessGame.load(data.boardState);
-            setChessPosition(data.boardState);
+            setPosition(data.boardState);
+            chessRef.current.load(data.boardState);
 
-            // Derive current turn from the FEN string (chess.js turn() returns 'w' or 'b')
-            const turn = chessGame.turn() === 'w' ? 'white' : 'black';
-            setCurrentTurn(turn);
-            isMyTurnRef.current = turn === gameData.playerColor;
-            console.log('Is my turn now?', isMyTurnRef.current, 'Turn:', turn, 'My color:', gameData.playerColor);
-
-            // Add move to history
-            if (data.move) {
+            // Add to move history
+            if (data.move?.san) {
               setMoveHistory(prev => [...prev, data.move.san]);
             }
 
+            // Check for game over
             if (data.gameOver && data.result) {
               handleGameOver(data.result);
             }
           } else if (data.error) {
+            console.error(`[${gameData.playerColor}] Move error:`, data.error);
             setErrorMessage(data.error);
             setTimeout(() => setErrorMessage(''), 3000);
           }
         });
 
+        // Handle game over
         gameSocket.on('game_over', (data) => {
-          console.log('Game over:', data);
+          console.log(`[${gameData.playerColor}] Game over:`, data);
           handleGameOver(data);
         });
 
+        // Handle errors
         gameSocket.on('error', (data) => {
-          console.error('Game error:', data);
+          console.error(`[${gameData.playerColor}] Error:`, data);
           setErrorMessage(data.message || 'An error occurred');
         });
 
+        // Handle disconnect
         gameSocket.setDisconnectHandler((message) => {
-          setConnectionStatus('disconnected');
+          console.log(`[${gameData.playerColor}] Disconnected:`, message);
           setErrorMessage(message);
           setTimeout(() => {
-            onGameEnd();
+            if (mounted) onGameEnd();
           }, 3000);
         });
+
       } catch (error) {
-        console.error('Failed to connect to game:', error);
-        setConnectionStatus('error');
+        console.error('Failed to connect:', error);
         setErrorMessage('Failed to connect to game server');
       }
     };
@@ -106,118 +106,80 @@ function ChessBoard({ gameData, onGameEnd, botCode }) {
     connectToGame();
 
     return () => {
-      if (autoPlayIntervalRef.current) {
-        clearInterval(autoPlayIntervalRef.current);
-      }
+      mounted = false;
       gameSocket.disconnect();
     };
-  }, [gameData, user.id]);
+  }, [gameData.wsPort, gameData.gameId, user.id, gameData.playerColor, onGameEnd]);
 
-  // Auto-play loop - checks every 100ms if it's our turn and enough time has passed
+  // Bot auto-play loop
   useEffect(() => {
-    if (connectionStatus !== 'connected' || !botCode || gameOver) {
+    if (gameOver || !botCode || processingMoveRef.current) {
       return;
     }
 
-    autoPlayIntervalRef.current = setInterval(() => {
+    const checkAndMakeMove = async () => {
+      // Check if it's our turn
+      const chess = new Chess(position);
+      const boardTurn = chess.turn() === 'w' ? 'white' : 'black';
+
+      // If it's not our turn, don't do anything
+      if (boardTurn !== gameData.playerColor) {
+        return;
+      }
+
+      // Enforce minimum time between moves
       const now = Date.now();
       const timeSinceLastMove = now - lastMoveTimeRef.current;
-
-      // Check if it's our turn, we're not already thinking, and cooldown has passed
-      if (isMyTurnRef.current && !isBotThinking && timeSinceLastMove >= 1000) {
-        makeAutomaticMove();
+      if (timeSinceLastMove < 2000) {
+        return;
       }
-    }, 100);
 
-    return () => {
-      if (autoPlayIntervalRef.current) {
-        clearInterval(autoPlayIntervalRef.current);
+      // Make a move
+      processingMoveRef.current = true;
+      setIsBotThinking(true);
+
+      try {
+        console.log(`[${gameData.playerColor}] Calculating move...`);
+
+        // Get move from bot
+        const [from, to] = await getBotMove(botCode, position);
+        console.log(`[${gameData.playerColor}] Bot chose: ${from} -> ${to}`);
+
+        // Send move to server
+        gameSocket.sendMove(from, to, 'q');
+        lastMoveTimeRef.current = Date.now();
+
+      } catch (error) {
+        console.error(`[${gameData.playerColor}] Bot error:`, error);
+        setErrorMessage(`Bot error: ${error.message}`);
+        setTimeout(() => setErrorMessage(''), 3000);
+      } finally {
+        processingMoveRef.current = false;
+        setIsBotThinking(false);
       }
     };
-  }, [connectionStatus, botCode, gameOver, isBotThinking]);
+
+    // Check every 500ms if we should make a move
+    const interval = setInterval(checkAndMakeMove, 500);
+
+    return () => clearInterval(interval);
+  }, [position, gameData.playerColor, botCode, gameOver]);
 
   const handleGameOver = (result) => {
+    console.log(`[${gameData.playerColor}] Handling game over:`, result);
     setGameOver(true);
     setGameResult(result);
-    if (autoPlayIntervalRef.current) {
-      clearInterval(autoPlayIntervalRef.current);
-    }
-    setTimeout(() => {
-      onGameEnd();
-    }, 5000);
+    setTimeout(() => onGameEnd(), 5000);
   };
 
-  const makeAutomaticMove = async () => {
-    if (gameOver || !botCode || isBotThinking) {
-      return;
-    }
-
-    try {
-      setIsBotThinking(true);
-      console.log(`[${gameData.playerColor}] Starting move calculation at`, new Date().toLocaleTimeString());
-
-      // Add delay before calling Piston API to avoid overloading
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Get move from bot
-      const [sourceSquare, targetSquare] = await getBotMove(botCode, chessGame.fen());
-      console.log(`[${gameData.playerColor}] Bot chose move:`, sourceSquare, '->', targetSquare);
-
-      // Validate move locally first
-      const testGame = new Chess(chessGame.fen());
-      const move = testGame.move({
-        from: sourceSquare,
-        to: targetSquare,
-        promotion: 'q',
-      });
-
-      if (!move) {
-        throw new Error('Invalid move returned by bot');
-      }
-
-      // Send move to server
-      gameSocket.sendMove(sourceSquare, targetSquare, 'q');
-
-      // Mark that it's no longer our turn (optimistic update)
-      isMyTurnRef.current = false;
-
-      // Update last move time AFTER sending to ensure proper spacing
-      lastMoveTimeRef.current = Date.now();
-
-    } catch (error) {
-      console.error('Bot move error:', error);
-      setErrorMessage(`Bot error: ${error.message}`);
-      setTimeout(() => setErrorMessage(''), 3000);
-
-      // On error, we still need to wait before trying again
-      lastMoveTimeRef.current = Date.now();
-    } finally {
-      setIsBotThinking(false);
-    }
-  };
-
-  const chessboardOptions = {
-    position: chessPosition,
-    boardOrientation: gameData.playerColor,
-    id: 'online-game',
-    draggable: false,
-  };
-
-  if (connectionStatus === 'connecting') {
+  if (gameOver && gameResult) {
     return (
       <div className="game-container">
-        <div className="game-status">Connecting to game server...</div>
-      </div>
-    );
-  }
-
-  if (connectionStatus === 'error' || connectionStatus === 'disconnected') {
-    return (
-      <div className="game-container">
-        <div className="game-error">
-          <h2>Connection Error</h2>
-          <p>{errorMessage}</p>
-          <p>Returning to matchmaking...</p>
+        <div className="game-over">
+          <h2>Game Over!</h2>
+          <p>Result: {gameResult.winner === 'draw' ? 'Draw' : `${gameResult.winner} wins`}</p>
+          <p>Reason: {gameResult.reason}</p>
+          <p>Returning to model selection...</p>
         </div>
       </div>
     );
@@ -229,7 +191,7 @@ function ChessBoard({ gameData, onGameEnd, botCode }) {
         <h2>Chess Game - AI vs AI</h2>
         <p>You are: <strong>{gameData.playerColor}</strong></p>
         <p>Current turn: <strong>{currentTurn}</strong></p>
-        <p>Bot status: <strong>{isBotThinking ? '🤔 Thinking...' : (isMyTurnRef.current ? '⚡ Ready' : '⏳ Waiting')}</strong></p>
+        <p>Bot status: <strong>{isBotThinking ? '🤔 Thinking...' : '⏳ Waiting'}</strong></p>
         {moveHistory.length > 0 && (
           <div className="move-history">
             <p>Last move: {moveHistory[moveHistory.length - 1]}</p>
@@ -240,17 +202,13 @@ function ChessBoard({ gameData, onGameEnd, botCode }) {
 
       {errorMessage && <div className="error-message">{errorMessage}</div>}
 
-      {gameOver && gameResult && (
-        <div className="game-over">
-          <h2>Game Over!</h2>
-          <p>Result: {gameResult.winner === 'draw' ? 'Draw' : `${gameResult.winner} wins`}</p>
-          <p>Reason: {gameResult.reason}</p>
-          <p>Returning to model selection...</p>
-        </div>
-      )}
-
       <div className="board-wrapper">
-        <Chessboard {...chessboardOptions} key={chessPosition} />
+        <Chessboard
+          key={position}
+          position={position}
+          boardOrientation={gameData.playerColor}
+          arePiecesDraggable={false}
+        />
       </div>
     </div>
   );

@@ -23,11 +23,18 @@ func NewHandler(api *api.API, svc services.Services) *Handler {
 
 func (h *Handler) registerRoutes() {
 	matchmakingGroup := h.api.Group("/matchmaking")
-	matchmakingGroup.Use(api.JWTAuthMiddleware(h.api.GetJWTSecret()))
+
+	// User-facing routes (require JWT auth)
+	authRoutes := matchmakingGroup.Group("")
+	authRoutes.Use(api.JWTAuthMiddleware(h.api.GetJWTSecret()))
 	{
-		matchmakingGroup.POST("/join", h.JoinQueue)
-		matchmakingGroup.POST("/leave", h.LeaveQueue)
-		matchmakingGroup.GET("/status", h.GetQueueStatus)
+		authRoutes.POST("/join", h.JoinQueue)
+		authRoutes.POST("/leave", h.LeaveQueue)
+		authRoutes.GET("/status", h.GetQueueStatus)
+	}
+
+	// Internal service routes (no auth required - for engine communication)
+	{
 		matchmakingGroup.POST("/cleanup/match/:matchId", h.CleanupMatch)
 		matchmakingGroup.POST("/cleanup/player/:userId", h.CleanupPlayer)
 	}
