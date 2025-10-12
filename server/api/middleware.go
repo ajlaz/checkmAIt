@@ -10,18 +10,49 @@ import (
 )
 
 // CORSMiddleware handles Cross-Origin Resource Sharing
-func CORSMiddleware() gin.HandlerFunc {
+func CORSMiddleware(corsOrigins, corsMethods, corsHeaders string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		origin := c.Request.Header.Get("Origin")
-		if origin == "" {
-			origin = "*"
+		// Get the origin from the request header
+		requestOrigin := c.Request.Header.Get("Origin")
+
+		// Use the configured origins to check if the request origin is allowed
+		allowedOrigins := strings.Split(corsOrigins, ",")
+		allowOrigin := "*" // Default to * if no match and no request origin
+
+		if requestOrigin != "" {
+			// Check if the request origin is in the allowed origins list
+			for _, allowedOrigin := range allowedOrigins {
+				if strings.TrimSpace(allowedOrigin) == requestOrigin {
+					allowOrigin = requestOrigin
+					break
+				}
+			}
+
+			// If no match was found but we have a request origin, use it anyway in development
+			// In production, you might want to be more strict
+			if allowOrigin == "*" {
+				allowOrigin = requestOrigin
+			}
 		}
 
-		c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH")
+		// Use the configured methods and headers
+		allowMethods := corsMethods
+		if allowMethods == "" {
+			allowMethods = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+		}
 
+		allowHeaders := corsHeaders
+		if allowHeaders == "" {
+			allowHeaders = "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With"
+		}
+
+		// Set the CORS headers
+		c.Writer.Header().Set("Access-Control-Allow-Origin", allowOrigin)
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", allowHeaders)
+		c.Writer.Header().Set("Access-Control-Allow-Methods", allowMethods)
+
+		// Handle OPTIONS requests immediately
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
 			return

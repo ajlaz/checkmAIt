@@ -27,8 +27,11 @@ func LoadConfig() (*Config, error) {
 			Port:     env["POSTGRES_PORT"],
 		},
 		HTTP: HTTPConfig{
-			Host: env["HTTP_HOST"],
-			Port: env["HTTP_PORT"],
+			Host:        env["HTTP_HOST"],
+			Port:        env["HTTP_PORT"],
+			CORSOrigins: env["HTTP_CORS_ORIGINS"],
+			CORSMethods: env["HTTP_CORS_METHODS"],
+			CORSHeaders: env["HTTP_CORS_HEADERS"],
 		},
 		Auth: AuthConfig{
 			JWTSecret: env["JWT_SECRET"],
@@ -50,8 +53,11 @@ type PostgresConfig struct {
 }
 
 type HTTPConfig struct {
-	Host string
-	Port string
+	Host        string
+	Port        string
+	CORSOrigins string // Comma-separated list of allowed origins
+	CORSMethods string // Comma-separated list of allowed HTTP methods
+	CORSHeaders string // Comma-separated list of allowed HTTP headers
 }
 
 type AuthConfig struct {

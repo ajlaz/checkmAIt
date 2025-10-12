@@ -18,8 +18,8 @@ func New(cfg *config.Config) *API {
 		jwtSecret:   cfg.Auth.JWTSecret,
 	}
 
-	// Add CORS middleware
-	api.Use(CORSMiddleware())
+	// Add CORS middleware with environment-based configuration
+	api.Use(CORSMiddleware(cfg.HTTP.CORSOrigins, cfg.HTTP.CORSMethods, cfg.HTTP.CORSHeaders))
 
 	api.RegisterDefaultRoutes()
 
