@@ -5,6 +5,7 @@ import ModelSelection from './components/ModelSelection';
 import ModelEditor from './components/ModelEditor';
 import MatchmakingQueue from './components/MatchmakingQueue';
 import ChessBoard from './components/ChessBoard';
+import { getModelCode } from './services/api';
 import './App.css';
 
 function App() {
@@ -12,20 +13,36 @@ function App() {
   const [appState, setAppState] = useState('auth'); // auth, model-selection, editor, matchmaking, game
   const [selectedModel, setSelectedModel] = useState(null);
   const [gameData, setGameData] = useState(null);
+  const [modelCode, setModelCode] = useState(null);
+  const [isLoadingModel, setIsLoadingModel] = useState(false);
 
   const handleModelSelected = (modelId) => {
     setSelectedModel(modelId);
     setAppState('matchmaking');
   };
 
-  const handleMatchFound = (matchData) => {
+  const handleMatchFound = async (matchData) => {
     setGameData(matchData);
-    setAppState('game');
+    setIsLoadingModel(true);
+
+    try {
+      // Fetch the model code for the selected model
+      const code = await getModelCode(selectedModel);
+      setModelCode(code);
+      setAppState('game');
+    } catch (error) {
+      console.error('Failed to fetch model code:', error);
+      alert('Failed to load your AI model. Returning to model selection.');
+      handleGameEnd();
+    } finally {
+      setIsLoadingModel(false);
+    }
   };
 
   const handleGameEnd = () => {
     setGameData(null);
     setSelectedModel(null);
+    setModelCode(null);
     setAppState('model-selection');
   };
 
@@ -78,7 +95,17 @@ function App() {
         />
       )}
       {appState === 'game' && gameData && (
-        <ChessBoard gameData={gameData} onGameEnd={handleGameEnd} />
+        isLoadingModel ? (
+          <div className="loading-container">
+            <p>Loading your AI model...</p>
+          </div>
+        ) : (
+          <ChessBoard
+            gameData={gameData}
+            onGameEnd={handleGameEnd}
+            botCode={modelCode}
+          />
+        )
       )}
     </div>
   );

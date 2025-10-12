@@ -94,7 +94,7 @@ def turn():
     Returns:
         str: 'w' for white, 'b' for black
     """
-    return board.turn()
+    return board.current_turn
 
 def get_available_functions():
     """List all available chess functions"""

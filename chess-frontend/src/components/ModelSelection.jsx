@@ -11,14 +11,8 @@ function ModelSelection({ onModelSelected, onCreateModel }) {
   const [selectedModel, setSelectedModel] = useState(null);
 
   useEffect(() => {
-    console.log('ModelSelection - Full user object:', user);
-    console.log('ModelSelection - user.id:', user.id);
-    console.log('ModelSelection - user.ID:', user.ID);
-    console.log('ModelSelection - typeof user.id:', typeof user.id);
-
     const fetchModels = async () => {
       try {
-        console.log('Fetching models for userId:', user.id);
         const response = await getUserModels(user.id);
         if (response.success && response.models) {
           setModels(response.models);
@@ -29,7 +23,6 @@ function ModelSelection({ onModelSelected, onCreateModel }) {
           setError('No models found. Please create a model first.');
         }
       } catch (err) {
-        console.error('Error fetching models:', err);
         setError('Failed to load models: ' + (err.response?.data?.error || err.message));
       } finally {
         setLoading(false);

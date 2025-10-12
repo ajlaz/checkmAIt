@@ -17,33 +17,40 @@ func CORSMiddleware(corsOrigins, corsMethods, corsHeaders string) gin.HandlerFun
 
 		// Use the configured origins to check if the request origin is allowed
 		allowedOrigins := strings.Split(corsOrigins, ",")
-		allowOrigin := "*" // Default to * if no match and no request origin
+		allowOrigin := ""
 
+		// Check if the request origin is in the allowed origins list
 		if requestOrigin != "" {
-			// Check if the request origin is in the allowed origins list
 			for _, allowedOrigin := range allowedOrigins {
-				if strings.TrimSpace(allowedOrigin) == requestOrigin {
+				trimmedOrigin := strings.TrimSpace(allowedOrigin)
+				// Support wildcard or exact match
+				if trimmedOrigin == "*" || trimmedOrigin == requestOrigin {
 					allowOrigin = requestOrigin
 					break
 				}
 			}
+		}
 
-			// If no match was found but we have a request origin, use it anyway in development
-			// In production, you might want to be more strict
-			if allowOrigin == "*" {
-				allowOrigin = requestOrigin
+		// If no origin matched, use the first allowed origin as fallback
+		// This handles cases where Origin header might not be sent
+		if allowOrigin == "" && len(allowedOrigins) > 0 {
+			firstOrigin := strings.TrimSpace(allowedOrigins[0])
+			if firstOrigin == "*" {
+				allowOrigin = "*"
+			} else {
+				allowOrigin = firstOrigin
 			}
 		}
 
 		// Use the configured methods and headers
 		allowMethods := corsMethods
 		if allowMethods == "" {
-			allowMethods = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+			allowMethods = "GET,POST,PUT,PATCH,DELETE,OPTIONS"
 		}
 
 		allowHeaders := corsHeaders
 		if allowHeaders == "" {
-			allowHeaders = "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With"
+			allowHeaders = "Content-Type,Content-Length,Accept-Encoding,X-CSRF-Token,Authorization,accept,origin,Cache-Control,X-Requested-With"
 		}
 
 		// Set the CORS headers

@@ -13,45 +13,53 @@ export const CODE_SNIPPETS = {
   python: `"""
 Chess Bot Template
 
-Write your chess bot by implementing the getMove() function.
+Write your chess bot by implementing the getMove(board) function.
 This function will be called when it's your turn to move.
 
-Available functions:
-- legal_moves() - Get all legal moves
-- is_check() - Check if king is in check
-- is_checkmate() - Check if position is checkmate
-- is_stalemate() - Check if position is stalemate
-- is_game_over() - Check if game ended
-- piece_at(square) - Get piece at a square (e.g., 'e4')
-- get_board() - Get board as 2D array
-- turn() - Get current turn ('w' or 'b')
+Available methods on board object:
+- board.legal_moves() - Get all legal moves as list of UCI strings (e.g., ['e2e4', 'g1f3'])
+- board.is_check() - Check if king is in check
+- board.is_checkmate() - Check if position is checkmate
+- board.is_stalemate() - Check if position is stalemate
+- board.is_game_over() - Check if game ended
+- board.piece_at(square) - Get piece at a square (e.g., 'e4')
+- board.get_board() - Get board as 2D array
+- board.current_turn - Get current turn ('w' or 'b')
+
+You can also use predefined helper functions like:
+- legal_moves(), is_check(), is_checkmate(), turn(), etc.
 """
 
-def getMove():
+def getMove(board):
     """
     REQUIRED: Return your bot's chosen move.
 
+    Args:
+        board: ChessBoard object representing current position
+
     Returns:
-        str: Move in algebraic notation (e.g., 'e2e4', 'g1f3')
+        tuple: (source_square, target_square) in algebraic notation
+        Example: ('e2', 'e4') to move pawn from e2 to e4
     """
-    # Get all legal moves
-    moves = legal_moves()
+    # Get all legal moves in UCI format (e.g., 'e2e4')
+    moves = board.legal_moves()
 
     # Example: Simple strategy - just pick the first legal move
     # TODO: Implement your own chess strategy here!
 
     if len(moves) > 0:
-        return moves[0]
+        # Convert UCI format 'e2e4' to tuple ('e2', 'e4')
+        first_move = moves[0]
+        source = first_move[:2]  # First 2 characters
+        target = first_move[2:4]  # Next 2 characters
+        return (source, target)
 
     return None  # No legal moves available
 
 
 # Test your bot logic here
-print("Available functions:")
-get_available_functions()
-
-print("\\nTesting getMove()...")
-# When you click 'Run Code', this will test your bot
+print("Chess bot ready!")
+print("Your getMove function will be called automatically during games.")
 `,
   java: `\npublic class HelloWorld {\n\tpublic static void main(String[] args) {\n\t\tSystem.out.println("Hello World");\n\t}\n}\n`,
   csharp:

@@ -40,6 +40,11 @@ export const getModelById = async (modelId) => {
   return response.data;
 };
 
+export const getModelCode = async (modelId) => {
+  const response = await api.get(`/models/${modelId}`);
+  return response.data.model; // Return just the model code
+};
+
 export const createModel = async (modelData) => {
   const response = await api.post('/models', modelData);
   return response.data;
