@@ -3,11 +3,13 @@ import { ChessEngineServer } from './cmd/server';
 // Configuration from environment variables
 const HTTP_PORT = process.env.HTTP_PORT ? parseInt(process.env.HTTP_PORT) : 3000;
 const WS_BASE_PORT = process.env.WS_BASE_PORT ? parseInt(process.env.WS_BASE_PORT) : 8080;
+const MATCHMAKING_URL = process.env.MATCHMAKING_URL || 'http://server:8080';
 
 // Create and start the server
 const server = new ChessEngineServer({
   httpPort: HTTP_PORT,
   wsBasePort: WS_BASE_PORT,
+  matchmakingURL: MATCHMAKING_URL,
 });
 
 server.start();

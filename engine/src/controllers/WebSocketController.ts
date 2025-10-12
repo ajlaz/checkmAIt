@@ -3,13 +3,21 @@ import { GameService } from '../services/GameService';
 import { MoveService } from '../services/MoveService';
 import { ConnectionService } from '../services/ConnectionService';
 import { Player, WebSocketMessage, MoveRequest } from '../types';
+import { MatchmakingClient } from '../MatchmakingClient';
 
 export class WebSocketController {
+  private matchmakingClient: MatchmakingClient | null = null;
+
   constructor(
     private gameService: GameService,
     private moveService: MoveService,
-    private connectionService: ConnectionService
-  ) {}
+    private connectionService: ConnectionService,
+    matchmakingURL?: string
+  ) {
+    if (matchmakingURL) {
+      this.matchmakingClient = new MatchmakingClient(matchmakingURL);
+    }
+  }
 
   /**
    * Handles new WebSocket connection
@@ -112,6 +120,13 @@ export class WebSocketController {
           type: 'game_over',
           data: moveResponse.result,
         });
+
+        // Cleanup matchmaking for both players
+        if (this.matchmakingClient && gameState.players.white && gameState.players.black) {
+          this.matchmakingClient.cleanupPlayer(gameState.players.white.id);
+          this.matchmakingClient.cleanupPlayer(gameState.players.black.id);
+        }
+
         return { success: true };
       }
 
@@ -171,6 +186,11 @@ export class WebSocketController {
     const color = this.connectionService.getPlayerColor(gameId, playerId);
     if (color) {
       this.connectionService.removePlayer(gameId, color);
+    }
+
+    // Cleanup player from matchmaking on disconnect
+    if (this.matchmakingClient) {
+      this.matchmakingClient.cleanupPlayer(playerId);
     }
   }
 

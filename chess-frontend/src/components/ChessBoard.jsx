@@ -36,10 +36,12 @@ function ChessBoard({ gameData, onGameEnd, botCode }) {
         // Set up message handlers
         gameSocket.on('connection', (data) => {
           console.log('Connected to game:', data);
+          console.log('My assigned color:', gameData.playerColor, 'Current turn:', data.currentTurn);
           chessGame.load(data.boardState);
           setChessPosition(data.boardState);
           setCurrentTurn(data.currentTurn);
           isMyTurnRef.current = data.currentTurn === gameData.playerColor;
+          console.log('Is it my turn after connection?', isMyTurnRef.current);
         });
 
         gameSocket.on('board_state', (data) => {
@@ -53,10 +55,15 @@ function ChessBoard({ gameData, onGameEnd, botCode }) {
         gameSocket.on('move', (data) => {
           console.log('Move response:', data);
           if (data.success && data.boardState) {
+            console.log('Updating board position to:', data.boardState);
             chessGame.load(data.boardState);
             setChessPosition(data.boardState);
-            setCurrentTurn(data.currentTurn === 'white' ? 'black' : 'white');
-            isMyTurnRef.current = data.currentTurn !== gameData.playerColor;
+
+            // Derive current turn from the FEN string (chess.js turn() returns 'w' or 'b')
+            const turn = chessGame.turn() === 'w' ? 'white' : 'black';
+            setCurrentTurn(turn);
+            isMyTurnRef.current = turn === gameData.playerColor;
+            console.log('Is my turn now?', isMyTurnRef.current, 'Turn:', turn, 'My color:', gameData.playerColor);
 
             // Add move to history
             if (data.move) {
@@ -147,9 +154,14 @@ function ChessBoard({ gameData, onGameEnd, botCode }) {
 
     try {
       setIsBotThinking(true);
+      console.log(`[${gameData.playerColor}] Starting move calculation at`, new Date().toLocaleTimeString());
+
+      // Add delay before calling Piston API to avoid overloading
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Get move from bot
       const [sourceSquare, targetSquare] = await getBotMove(botCode, chessGame.fen());
+      console.log(`[${gameData.playerColor}] Bot chose move:`, sourceSquare, '->', targetSquare);
 
       // Validate move locally first
       const testGame = new Chess(chessGame.fen());
@@ -163,14 +175,14 @@ function ChessBoard({ gameData, onGameEnd, botCode }) {
         throw new Error('Invalid move returned by bot');
       }
 
-      // Update last move time BEFORE sending to prevent rapid-fire moves
-      lastMoveTimeRef.current = Date.now();
-
       // Send move to server
       gameSocket.sendMove(sourceSquare, targetSquare, 'q');
 
       // Mark that it's no longer our turn (optimistic update)
       isMyTurnRef.current = false;
+
+      // Update last move time AFTER sending to ensure proper spacing
+      lastMoveTimeRef.current = Date.now();
 
     } catch (error) {
       console.error('Bot move error:', error);
@@ -238,7 +250,7 @@ function ChessBoard({ gameData, onGameEnd, botCode }) {
       )}
 
       <div className="board-wrapper">
-        <Chessboard {...chessboardOptions} />
+        <Chessboard {...chessboardOptions} key={chessPosition} />
       </div>
     </div>
   );

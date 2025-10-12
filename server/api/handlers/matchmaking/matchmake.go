@@ -219,3 +219,57 @@ func (h *Handler) GetQueueStatus(c *gin.Context) {
 		"message": "Player is not in the matchmaking queue",
 	})
 }
+
+func (h *Handler) CleanupMatch(c *gin.Context) {
+	matchID := c.Param("matchId")
+	if matchID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Match ID is required",
+		})
+		return
+	}
+
+	err := h.svc.MatchmakingService.RemoveMatch(matchID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Failed to cleanup match: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": "Match cleaned up successfully",
+	})
+}
+
+func (h *Handler) CleanupPlayer(c *gin.Context) {
+	userIDStr := c.Param("userId")
+	if userIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "User ID is required",
+		})
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid user ID format",
+		})
+		return
+	}
+
+	err = h.svc.MatchmakingService.RemovePlayerFromMatch(userID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Failed to cleanup player: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": "Player cleaned up successfully",
+	})
+}

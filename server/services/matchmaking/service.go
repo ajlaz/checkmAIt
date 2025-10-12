@@ -37,6 +37,12 @@ type ServiceInterface interface {
 	// RemoveFromQueue removes a player from the queue
 	RemoveFromQueue(userID int) error
 
+	// RemoveMatch removes a match and cleans up player mappings
+	RemoveMatch(matchID string) error
+
+	// RemovePlayerFromMatch removes a player from their current match
+	RemovePlayerFromMatch(userID int) error
+
 	// GetQueueStats returns statistics about the current queue
 	GetQueueStats() (int, int)
 }

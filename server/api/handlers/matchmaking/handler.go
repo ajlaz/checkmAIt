@@ -28,5 +28,7 @@ func (h *Handler) registerRoutes() {
 		matchmakingGroup.POST("/join", h.JoinQueue)
 		matchmakingGroup.POST("/leave", h.LeaveQueue)
 		matchmakingGroup.GET("/status", h.GetQueueStatus)
+		matchmakingGroup.POST("/cleanup/match/:matchId", h.CleanupMatch)
+		matchmakingGroup.POST("/cleanup/player/:userId", h.CleanupPlayer)
 	}
 }

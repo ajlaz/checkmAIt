@@ -1,17 +1,30 @@
 import WebSocket, { WebSocketServer as WSServer } from 'ws';
 import { GameManager } from './GameManager';
 import { WebSocketMessage, MoveRequest, Player } from './types';
+import { MatchmakingClient } from './MatchmakingClient';
 
 export class WebSocketServer {
   private wss: WSServer;
   private gameManager: GameManager;
   private port: number;
+  private matchmakingClient: MatchmakingClient | null = null;
+  private gameIdToMatchId: Map<string, string> = new Map();
 
-  constructor(gameManager: GameManager, port: number) {
+  constructor(gameManager: GameManager, port: number, matchmakingURL?: string) {
     this.gameManager = gameManager;
     this.port = port;
     this.wss = new WSServer({ port });
+
+    // Initialize matchmaking client if URL is provided
+    if (matchmakingURL) {
+      this.matchmakingClient = new MatchmakingClient(matchmakingURL);
+    }
+
     this.setupWebSocketServer();
+  }
+
+  setMatchId(gameId: string, matchId: string): void {
+    this.gameIdToMatchId.set(gameId, matchId);
   }
 
   private setupWebSocketServer(): void {
@@ -83,8 +96,13 @@ export class WebSocketServer {
         }
       });
 
-      ws.on('close', () => {
+      ws.on('close', async () => {
         console.log(`Player ${playerId} disconnected from game ${gameId}`);
+
+        // Cleanup player from matchmaking on disconnect
+        if (this.matchmakingClient) {
+          await this.matchmakingClient.cleanupPlayer(playerId);
+        }
       });
 
       ws.on('error', (error) => {
@@ -157,7 +175,7 @@ export class WebSocketServer {
     }));
   }
 
-  private broadcastGameOver(gameState: any, result: any): void {
+  private async broadcastGameOver(gameState: any, result: any): Promise<void> {
     const message = JSON.stringify({
       type: 'game_over',
       data: result,
@@ -165,6 +183,15 @@ export class WebSocketServer {
 
     gameState.players.white?.ws?.send(message);
     gameState.players.black?.ws?.send(message);
+
+    // Cleanup match from matchmaking on game end
+    if (this.matchmakingClient) {
+      const matchId = this.gameIdToMatchId.get(gameState.gameId);
+      if (matchId) {
+        await this.matchmakingClient.cleanupMatch(matchId);
+        this.gameIdToMatchId.delete(gameState.gameId);
+      }
+    }
   }
 
   getPort(): number {

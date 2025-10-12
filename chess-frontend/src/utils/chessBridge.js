@@ -14,8 +14,9 @@ import { Chess } from "chess.js";
 export const generateBoardMock = (fen) => {
   const chess = new Chess(fen);
 
-  // Get legal moves
-  const moves = chess.moves({ verbose: false });
+  // Get legal moves in UCI format (e.g., 'e2e4', 'g1f3')
+  const verboseMoves = chess.moves({ verbose: true });
+  const moves = verboseMoves.map(move => move.from + move.to);
 
   // Get board as 2D array
   const board = chess.board();
@@ -138,18 +139,24 @@ ${userCode}
 
 # Test execution
 try:
-    move = getMove()
+    move = getMove(board)
     print(f"Bot chose move: {move}")
 
     # Validate the move
-    legal = legal_moves()
-    if move in legal:
-        print(f"✓ Valid move! '{move}' is legal.")
+    if not isinstance(move, tuple) or len(move) != 2:
+        print(f"ERROR: Move must be a tuple of (source_square, target_square), got {move}")
     else:
-        print(f"✗ Invalid move! '{move}' is not in legal moves: {legal}")
+        source, target = move
+        move_uci = source + target
+        legal = legal_moves()
+        if move_uci in legal:
+            print(f"✓ Valid move! '{source}' -> '{target}' ({move_uci}) is legal.")
+            print(f"Move: {source} -> {target}")
+        else:
+            print(f"✗ Invalid move! '{move_uci}' is not in legal moves: {legal}")
 except NameError as e:
     if "getMove" in str(e):
-        print("ERROR: getMove() function not defined. Please define a getMove() function.")
+        print("ERROR: getMove() function not defined. Please define a getMove(board) function.")
     else:
         print(f"ERROR: {e}")
 except Exception as e:

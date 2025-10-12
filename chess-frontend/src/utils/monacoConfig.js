@@ -9,11 +9,11 @@ export const PREDEFINED_FUNCTION_COMPLETIONS = [
   },
   {
     label: "board.legal_moves",
-    kind: "Property",
-    insertText: "board.legal_moves",
+    kind: "Method",
+    insertText: "board.legal_moves()",
     insertTextRules: "InsertAsSnippet",
-    documentation: "Get iterator of legal moves in the current position.\n\nExample:\n    legal_moves = list(board.legal_moves)\n    if legal_moves:\n        move = legal_moves[0]\n        source = chess.square_name(move.from_square)\n        target = chess.square_name(move.to_square)\n        return (source, target)",
-    detail: "board.legal_moves -> chess.LegalMoveGenerator",
+    documentation: "Get all legal moves in UCI format.\n\nReturns a list of move strings like ['e2e4', 'g1f3', 'a2a3']\n\nExample:\n    moves = board.legal_moves()\n    if moves:\n        first_move = moves[0]  # e.g., 'e2e4'\n        source = first_move[:2]  # 'e2'\n        target = first_move[2:4]  # 'e4'\n        return (source, target)",
+    detail: "board.legal_moves() -> list[str]",
   },
   {
     label: "board.is_checkmate",

@@ -1,5 +1,5 @@
 import { executeCode } from '../services/api';
-import { getTestCode } from './codeUtils';
+import { getTestCode } from './chessBridge';
 import { PREDEFINED_FUNCTIONS } from './predefinedFunctions';
 
 /**
@@ -19,14 +19,19 @@ export const getBotMove = async (botCode, fen) => {
     throw new Error(`Bot error: ${result.stderr}`);
   }
 
-  // Parse move from output
+  // Parse move from output (look for the last "Move:" line in case there are other prints)
   const output = result.output.trim();
-  if (!output.startsWith('Move:')) {
-    throw new Error('Invalid bot output format');
+  const lines = output.split('\n');
+
+  // Find the last line that starts with "Move:"
+  const moveLine = lines.reverse().find(line => line.trim().startsWith('Move:'));
+
+  if (!moveLine) {
+    throw new Error('Invalid bot output format - no "Move:" line found');
   }
 
   // Extract source and target squares
-  const moveMatch = output.match(/Move: (\w+) -> (\w+)/);
+  const moveMatch = moveLine.match(/Move: (\w+) -> (\w+)/);
   if (!moveMatch) {
     throw new Error('Could not parse move from bot output');
   }

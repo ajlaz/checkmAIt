@@ -164,3 +164,54 @@ func (s *Service) GetQueueStats() (int, int) {
 
 	return len(s.queue), len(s.matches)
 }
+
+// RemoveMatch removes a match by ID and cleans up all associated player mappings
+func (s *Service) RemoveMatch(matchID string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Find the match
+	match, exists := s.matches[matchID]
+	if !exists {
+		return errors.New("match not found")
+	}
+
+	// Remove player mappings
+	delete(s.playerMatches, match.Player1.UserID)
+	delete(s.playerMatches, match.Player2.UserID)
+
+	// Remove the match itself
+	delete(s.matches, matchID)
+
+	return nil
+}
+
+// RemovePlayerFromMatch removes a player from their current match
+// This is useful when a player disconnects or a game ends
+func (s *Service) RemovePlayerFromMatch(userID int) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Find the match ID for this player
+	matchID, exists := s.playerMatches[userID]
+	if !exists {
+		return errors.New("player is not in any match")
+	}
+
+	// Get the match to find the other player
+	match, found := s.matches[matchID]
+	if !found {
+		// Clean up orphaned player mapping
+		delete(s.playerMatches, userID)
+		return nil
+	}
+
+	// Remove both players from the match
+	delete(s.playerMatches, match.Player1.UserID)
+	delete(s.playerMatches, match.Player2.UserID)
+
+	// Remove the match
+	delete(s.matches, matchID)
+
+	return nil
+}

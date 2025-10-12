@@ -12,6 +12,7 @@ import { WebSocketPoolManager } from '../internal/WebSocketPoolManager';
 interface ServerConfig {
   httpPort: number;
   wsBasePort: number;
+  matchmakingURL?: string;
 }
 
 /**
@@ -45,7 +46,8 @@ export class ChessEngineServer {
     this.wsController = new WebSocketController(
       this.gameService,
       this.moveService,
-      this.connectionService
+      this.connectionService,
+      config.matchmakingURL
     );
 
     // WebSocket pool manager

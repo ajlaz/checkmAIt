@@ -1,28 +1,28 @@
 // Chess bot template with utility functions
 export const DEFAULT_BOT_CODE = `def getMove(board):
     """Get next move for the bot
-    
+
     Args:
-        board: chess.Board object representing current position
-        
+        board: ChessBoard object representing current position
+
     Returns:
         tuple: (source_square, target_square) e.g. ('e2', 'e4')
     """
-    # Get all legal moves in current position
-    legal_moves = list(board.legal_moves)
-    if not legal_moves:
+    # Get all legal moves in UCI format (e.g., ['e2e4', 'g1f3'])
+    moves = board.legal_moves()
+    if not moves:
         return None
-        
+
     # Simple strategy - pick first legal move
     # TODO: Implement your strategy here!
-    move = legal_moves[0]
-    
-    # Convert move to source-target format
-    source = chess.square_name(move.from_square)
-    target = chess.square_name(move.to_square)
-    
+    first_move = moves[0]
+
+    # Convert UCI format 'e2e4' to tuple ('e2', 'e4')
+    source_square = first_move[:2]  # First 2 characters
+    target_square = first_move[2:4]  # Next 2 characters
+
     # Return move as (source, target) tuple
-    return (source, target)
+    return (source_square, target_square)
 `;
 
 // Python utility functions available to the bot
