@@ -10,6 +10,8 @@ export const PREDEFINED_FUNCTIONS = `
 # Chess API - Predefined functions for building your chess bot
 # These functions interact with the current board state
 
+import random
+
 def legal_moves():
     """
     Get all legal moves in the current position.
