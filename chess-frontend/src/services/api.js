@@ -50,6 +50,11 @@ export const createModel = async (modelData) => {
   return response.data;
 };
 
+export const updateModel = async (modelId, modelData) => {
+  const response = await api.put(`/models/${modelId}`, modelData);
+  return response.data;
+};
+
 // Matchmaking APIs
 export const joinMatchmakingQueue = async (modelId) => {
   const response = await api.post('/matchmaking/join', { modelId });

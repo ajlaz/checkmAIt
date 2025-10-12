@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getUserModels } from '../services/api';
+import ModelEditor from './ModelEditor';
 import './ModelSelection.css';
 
 function ModelSelection({ onModelSelected, onCreateModel }) {
@@ -9,6 +10,7 @@ function ModelSelection({ onModelSelected, onCreateModel }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedModel, setSelectedModel] = useState(null);
+  const [modelToEdit, setModelToEdit] = useState(null);
 
   useEffect(() => {
     const fetchModels = async () => {
@@ -37,6 +39,41 @@ function ModelSelection({ onModelSelected, onCreateModel }) {
       onModelSelected(selectedModel);
     }
   };
+
+  const handleEditModel = (model) => {
+    setModelToEdit(model);
+  };
+
+  const handleModelSaved = async () => {
+    // Refresh models list after save
+    try {
+      setLoading(true);
+      const response = await getUserModels(user.id);
+      if (response.success && response.models) {
+        setModels(response.models);
+        if (response.models.length > 0 && !selectedModel) {
+          setSelectedModel(response.models[0].id);
+        }
+      }
+    } catch (err) {
+      setError('Failed to refresh models: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setLoading(false);
+      setModelToEdit(null);
+    }
+  };
+
+  // If we're editing a model, show the ModelEditor instead
+  if (modelToEdit) {
+    return (
+      <ModelEditor
+        onModelSaved={handleModelSaved}
+        onCancel={() => setModelToEdit(null)}
+        existingModel={modelToEdit}
+        isEditing={true}
+      />
+    );
+  }
 
   return (
     <div className="model-selection-container">
@@ -73,17 +110,36 @@ function ModelSelection({ onModelSelected, onCreateModel }) {
                     <h3>{model.name}</h3>
                     <p>Rating: {model.rating}</p>
                   </div>
-                  {selectedModel === model.id && <span className="checkmark">✓</span>}
+                  <div className="model-actions">
+                    {selectedModel === model.id && <span className="checkmark">✓</span>}
+                    <button
+                      className="edit-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditModel(model);
+                      }}
+                    >
+                      Edit
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
-            <button
-              className="continue-btn"
-              onClick={handleContinue}
-              disabled={!selectedModel}
-            >
-              Continue to Matchmaking
-            </button>
+            <div className="action-buttons">
+              <button
+                className="continue-btn"
+                onClick={handleContinue}
+                disabled={!selectedModel}
+              >
+                Continue to Matchmaking
+              </button>
+              <button
+                className="create-model-btn"
+                onClick={onCreateModel}
+              >
+                Create New Model
+              </button>
+            </div>
           </>
         )}
       </div>

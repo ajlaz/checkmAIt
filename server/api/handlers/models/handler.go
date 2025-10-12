@@ -34,6 +34,7 @@ func (h *Handler) registerRoutes() {
 	{
 		modelGroup.GET("/:id", h.GetModelByID)
 		modelGroup.GET("/user/:userId", h.GetModelsByUserID)
-		modelGroup.POST("", h.CreateModel) // Changed from "/" to "" to avoid any potential redirect issues
+		modelGroup.POST("", h.CreateModel)    
+		modelGroup.PUT("/:id", h.UpdateModel) 
 	}
 }

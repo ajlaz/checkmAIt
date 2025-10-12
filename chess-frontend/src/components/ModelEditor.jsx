@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -14,9 +14,9 @@ import { CODE_SNIPPETS } from '../utils/constants';
 import { PREDEFINED_FUNCTIONS } from '../utils/predefinedFunctions';
 import { getTestCode, validateBotCode } from '../utils/chessBridge';
 import { TEST_POSITIONS, DEFAULT_TEST_POSITION } from '../utils/testPositions';
-import { executeCode, createModel } from '../services/api';
+import { executeCode, createModel, updateModel } from '../services/api';
 
-function ModelEditor({ onModelSaved, onCancel }) {
+function ModelEditor({ onModelSaved, onCancel, existingModel, isEditing }) {
   const { user } = useAuth();
   const editorRef = useRef();
   const toast = useToast();
@@ -26,11 +26,20 @@ function ModelEditor({ onModelSaved, onCancel }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState(DEFAULT_TEST_POSITION);
+  const [modelName, setModelName] = useState('');
 
   // Still need saving state for tracking API calls
   const [isSaving, setIsSaving] = useState(false);
 
   const language = 'python';
+
+  // Load existing model code if we're editing
+  useEffect(() => {
+    if (existingModel) {
+      setValue(existingModel.model); // The model code is stored in the 'model' field
+      setModelName(existingModel.name);
+    }
+  }, [existingModel]);
 
   const onMount = (editor) => {
     editorRef.current = editor;
@@ -115,8 +124,11 @@ function ModelEditor({ onModelSaved, onCancel }) {
       return;
     }
 
-    // Ask for name directly in the toast with an input
-    const name = window.prompt('Enter a name for your model:');
+    // If editing an existing model, use its name, otherwise prompt for a name
+    let name = modelName;
+    if (!existingModel) {
+      name = window.prompt('Enter a name for your model:');
+    }
 
     if (name) {
       handleSaveModel(name);
@@ -135,29 +147,47 @@ function ModelEditor({ onModelSaved, onCancel }) {
     }
 
     const sourceCode = editorRef.current.getValue();
+    const trimmedName = name.trim();
 
     try {
       setIsSaving(true);
-      await createModel({
-        user_id: user.id,
-        name: name.trim(),
-        model: sourceCode,
-      });
 
-      toast({
-        title: 'Model saved!',
-        description: `Your model "${name}" has been created successfully`,
-        status: 'success',
-        duration: 3000,
-      });
+      if (existingModel) {
+        // Update existing model
+        await updateModel(existingModel.id, {
+          name: trimmedName,
+          model: sourceCode,  // Changed from modelCode to model to match the backend
+        });
+
+        toast({
+          title: 'Model updated!',
+          description: `Your model "${trimmedName}" has been updated successfully`,
+          status: 'success',
+          duration: 3000,
+        });
+      } else {
+        // Create new model
+        await createModel({
+          user_id: user.id,
+          name: trimmedName,
+          model: sourceCode,
+        });
+
+        toast({
+          title: 'Model saved!',
+          description: `Your model "${trimmedName}" has been created successfully`,
+          status: 'success',
+          duration: 3000,
+        });
+      }
 
       setTimeout(() => {
         onModelSaved();
       }, 500);
     } catch (error) {
       toast({
-        title: 'Save failed',
-        description: error.response?.data?.error || 'Failed to save model',
+        title: existingModel ? 'Update failed' : 'Save failed',
+        description: error.response?.data?.error || `Failed to ${existingModel ? 'update' : 'save'} model`,
         status: 'error',
         duration: 6000,
       });
@@ -171,11 +201,11 @@ function ModelEditor({ onModelSaved, onCancel }) {
       <VStack align="stretch" spacing={4} mb={4}>
         <HStack justify="space-between">
           <Text fontSize="2xl" fontWeight="bold" color="white">
-            Create Your Chess AI Model
+            {existingModel ? `Edit Model: ${existingModel.name}` : 'Create Your Chess AI Model'}
           </Text>
           <HStack>
             <Button colorScheme="green" onClick={handleSaveClick} isLoading={isSaving}>
-              Save Model
+              {existingModel ? 'Update Model' : 'Save Model'}
             </Button>
             {onCancel && (
               <Button variant="outline" onClick={onCancel}>
