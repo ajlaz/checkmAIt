@@ -16,6 +16,9 @@ services:
       - POSTGRES_PORT=${POSTGRES_PORT:-5432}
       - HTTP_HOST=0.0.0.0
       - HTTP_PORT=8080
+      - HTTP_CORS_ORIGINS=${HTTP_CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
+      - HTTP_CORS_METHODS=${HTTP_CORS_METHODS:-GET,POST,PUT,DELETE,OPTIONS}
+      - HTTP_CORS_HEADERS=${HTTP_CORS_HEADERS:-Authorization,Content-Type}
       - JWT_SECRET=${JWT_SECRET:-change_this_in_production}
       - ENGINE_URL=http://engine:3000
     command: ./server serve
@@ -72,6 +75,9 @@ services:
       - POSTGRES_PORT=${POSTGRES_PORT:-5432}
       - HTTP_HOST=0.0.0.0
       - HTTP_PORT=8080
+      - HTTP_CORS_ORIGINS=${HTTP_CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
+      - HTTP_CORS_METHODS=${HTTP_CORS_METHODS:-GET,POST,PUT,DELETE,OPTIONS}
+      - HTTP_CORS_HEADERS=${HTTP_CORS_HEADERS:-Authorization,Content-Type}
       - JWT_SECRET=${JWT_SECRET:-change_this_in_production}
     # Use a script to wait for Postgres to be ready and then run migrations
     command: >
