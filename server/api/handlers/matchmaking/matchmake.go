@@ -2,12 +2,13 @@ package matchmaking
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 type JoinQueueRequest struct {
-	ModelID string `json:"modelId" binding:"required"`
+	ModelID int `json:"modelId" binding:"required"`
 }
 
 type QueueStatusResponse struct {
@@ -29,8 +30,23 @@ func (h *Handler) JoinQueue(c *gin.Context) {
 		return
 	}
 
-	userID, ok := userIDVal.(string)
-	if !ok {
+	// Convert userID to int based on the type
+	var userID int
+
+	// JWT claims are stored as float64 when unmarshalled
+	switch v := userIDVal.(type) {
+	case float64:
+		userID = int(v)
+	case string:
+		var err error
+		userID, err = strconv.Atoi(v)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Unauthorized: Invalid user ID format",
+			})
+			return
+		}
+	default:
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Unauthorized: Invalid user ID format",
 		})
@@ -58,7 +74,7 @@ func (h *Handler) JoinQueue(c *gin.Context) {
 	// If match is nil, user is still in queue
 	if match == nil {
 		c.JSON(http.StatusOK, gin.H{
-			"status": "queued",
+			"status":  "queued",
 			"message": "Added to matchmaking queue, waiting for opponent...",
 		})
 		return
@@ -90,8 +106,23 @@ func (h *Handler) LeaveQueue(c *gin.Context) {
 		return
 	}
 
-	userID, ok := userIDVal.(string)
-	if !ok {
+	// Convert userID to int based on the type
+	var userID int
+
+	// JWT claims are stored as float64 when unmarshalled
+	switch v := userIDVal.(type) {
+	case float64:
+		userID = int(v)
+	case string:
+		var err error
+		userID, err = strconv.Atoi(v)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Unauthorized: Invalid user ID format",
+			})
+			return
+		}
+	default:
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Unauthorized: Invalid user ID format",
 		})
@@ -108,7 +139,7 @@ func (h *Handler) LeaveQueue(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status": "success",
+		"status":  "success",
 		"message": "Removed from matchmaking queue",
 	})
 }
@@ -123,8 +154,23 @@ func (h *Handler) GetQueueStatus(c *gin.Context) {
 		return
 	}
 
-	userID, ok := userIDVal.(string)
-	if !ok {
+	// Convert userID to int based on the type
+	var userID int
+
+	// JWT claims are stored as float64 when unmarshalled
+	switch v := userIDVal.(type) {
+	case float64:
+		userID = int(v)
+	case string:
+		var err error
+		userID, err = strconv.Atoi(v)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Unauthorized: Invalid user ID format",
+			})
+			return
+		}
+	default:
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Unauthorized: Invalid user ID format",
 		})
@@ -169,7 +215,7 @@ func (h *Handler) GetQueueStatus(c *gin.Context) {
 
 	// Player is not in queue or match
 	c.JSON(http.StatusOK, gin.H{
-		"status": "not_queued",
+		"status":  "not_queued",
 		"message": "Player is not in the matchmaking queue",
 	})
 }

@@ -18,7 +18,7 @@ func generateGameID() string {
 }
 
 // AddToQueue adds a player to the matchmaking queue and attempts to find a match
-func (s *Service) AddToQueue(userID, modelID string) (*Match, error) {
+func (s *Service) AddToQueue(userID, modelID int) (*Match, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -63,7 +63,8 @@ func (s *Service) AddToQueue(userID, modelID string) (*Match, error) {
 		player2.MatchedAt = &now
 
 		// Randomly assign colors
-		var whitePlayerID, whiteModelID, blackPlayerID, blackModelID string
+		var whitePlayerID, blackPlayerID int
+		var whiteModelID, blackModelID int
 		if rand.Intn(2) == 0 {
 			whitePlayerID = player1.UserID
 			whiteModelID = player1.ModelID
@@ -75,14 +76,13 @@ func (s *Service) AddToQueue(userID, modelID string) (*Match, error) {
 			blackPlayerID = player1.UserID
 			blackModelID = player1.ModelID
 		}
-
 		// Create a game via engine service
 		returnedGameID, wsPort, err := s.engineService.CreateGame(
 			gameID,
-			whitePlayerID, whiteModelID,
-			blackPlayerID, blackModelID,
+			fmt.Sprintf("%d", whitePlayerID), fmt.Sprintf("%d", whiteModelID),
+			fmt.Sprintf("%d", blackPlayerID), fmt.Sprintf("%d", blackModelID),
 		)
-		
+
 		if err != nil {
 			// If creating the game fails, put the players back in the queue
 			s.queue = append([]Player{player1, player2}, s.queue...)
@@ -102,11 +102,11 @@ func (s *Service) AddToQueue(userID, modelID string) (*Match, error) {
 			Status:      "matched",
 		}
 		s.matches[matchID] = match
-		
+
 		// Add player-to-match mapping for quick lookup
 		s.playerMatches[player1.UserID] = matchID
 		s.playerMatches[player2.UserID] = matchID
-		
+
 		return match, nil
 	}
 
@@ -115,7 +115,7 @@ func (s *Service) AddToQueue(userID, modelID string) (*Match, error) {
 }
 
 // GetPlayerStatus returns the match for a player if matched, or their position in queue
-func (s *Service) GetPlayerStatus(userID string) (*Match, int, error) {
+func (s *Service) GetPlayerStatus(userID int) (*Match, int, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -138,7 +138,7 @@ func (s *Service) GetPlayerStatus(userID string) (*Match, int, error) {
 }
 
 // RemoveFromQueue removes a player from the queue
-func (s *Service) RemoveFromQueue(userID string) error {
+func (s *Service) RemoveFromQueue(userID int) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -161,6 +161,6 @@ func (s *Service) RemoveFromQueue(userID string) error {
 func (s *Service) GetQueueStats() (int, int) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	return len(s.queue), len(s.matches)
 }

@@ -28,11 +28,12 @@ func NewHandler(a *api.API, userService user.ServiceInterface, modelService user
 }
 
 func (h *Handler) registerRoutes() {
-	// Public routes
+	// Models routes - require authentication
 	modelGroup := h.Group("/models")
+	modelGroup.Use(api.JWTAuthMiddleware(h.jwtSecret))
 	{
 		modelGroup.GET("/:id", h.GetModelByID)
 		modelGroup.GET("/user/:userId", h.GetModelsByUserID)
-		modelGroup.POST("", h.CreateModel)  // Remove trailing slash to avoid redirects
+		modelGroup.POST("", h.CreateModel) // Changed from "/" to "" to avoid any potential redirect issues
 	}
 }
