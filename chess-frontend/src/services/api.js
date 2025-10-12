@@ -71,26 +71,16 @@ export const leaveMatchmakingQueue = async () => {
   return response.data;
 };
 
-// Piston API for code execution
-const pistonAPI = axios.create({
-  baseURL: 'https://emkc.org/api/v2/piston',
-});
+// Local Python execution using Pyodide
+import { executePythonCode } from './pyodideService';
 
 export const executeCode = async (language, sourceCode) => {
-  const LANGUAGE_VERSIONS = {
-    python: '3.10.0',
-  };
+  if (language !== 'python') {
+    throw new Error(`Unsupported language: ${language}. Only Python is supported.`);
+  }
 
-  const response = await pistonAPI.post('/execute', {
-    language: language,
-    version: LANGUAGE_VERSIONS[language],
-    files: [
-      {
-        content: sourceCode,
-      },
-    ],
-  });
-  return response.data;
+  // Execute Python code locally using Pyodide
+  return await executePythonCode(sourceCode);
 };
 
 export default api;

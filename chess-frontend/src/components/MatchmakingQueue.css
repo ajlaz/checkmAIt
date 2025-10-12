@@ -3,72 +3,89 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--bg-primary);
+  padding: var(--spacing-xl);
 }
 
 .matchmaking-card {
-  background: white;
-  padding: 3rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: var(--bg-secondary);
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
   text-align: center;
-  min-width: 400px;
+  min-width: 450px;
 }
 
 .matchmaking-card h2 {
-  margin: 1rem 0;
-  color: #333;
+  margin: var(--spacing-xl) 0;
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
 }
 
 .spinner {
-  width: 60px;
-  height: 60px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+  width: 80px;
+  height: 80px;
+  border: 5px solid var(--bg-elevated);
+  border-top: 5px solid var(--accent-red);
+  border-radius: var(--radius-full);
+  animation: spin 0.8s linear infinite;
   margin: 0 auto;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .success-icon {
-  width: 60px;
-  height: 60px;
-  background: #27ae60;
-  color: white;
-  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  background: var(--success-color);
+  color: var(--bg-primary);
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: 2.5rem;
   margin: 0 auto;
+  font-weight: 900;
 }
 
 .queue-info {
-  color: #666;
-  margin: 1rem 0;
+  color: var(--text-secondary);
+  margin: var(--spacing-xl) 0;
+  font-size: 1rem;
 }
 
 .cancel-btn, .retry-btn {
-  margin-top: 1.5rem;
-  padding: 0.75rem 2rem;
-  background: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 4px;
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-md) var(--spacing-xl);
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 0.875rem;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .cancel-btn:hover, .retry-btn:hover {
-  background: #c0392b;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border-color: var(--text-primary);
 }
 
 .error {
-  color: #e74c3c;
-  margin: 1rem 0;
+  color: var(--accent-red);
+  margin: var(--spacing-md) 0;
+  font-weight: 600;
 }

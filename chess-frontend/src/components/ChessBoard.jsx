@@ -193,8 +193,6 @@ function ChessBoard({ gameData, onGameEnd, botCode }) {
         )}
       </div>
 
-      {errorMessage && <div className="error-message">{errorMessage}</div>}
-
       {gameOver && gameResult && (
         <div className="game-over">
           <h2>Game Over!</h2>

@@ -28,6 +28,7 @@ Available methods on board object:
 
 You can also use predefined helper functions like:
 - legal_moves(), is_check(), is_checkmate(), turn(), etc.
+- get_board_after_move(board, move) - Simulate a move and see the resulting board!
 """
 
 def getMove(board):
@@ -44,15 +45,21 @@ def getMove(board):
     # Get all legal moves in UCI format (e.g., 'e2e4')
     moves = board.legal_moves()
 
-    # Example: Simple strategy - just pick the first legal move
-    # TODO: Implement your own chess strategy here!
+    # Example strategy: prefer moves that give check
+    for move_str in moves:
+        # Convert 'e2e4' to tuple ('e2', 'e4')
+        move_tuple = (move_str[:2], move_str[2:4])
 
+        # Simulate this move and check if it puts opponent in check
+        future_board = get_board_after_move(board, move_tuple)
+        if future_board.is_check():
+            print(f"Found a checking move: {move_tuple}")
+            return move_tuple
+
+    # If no checking moves, pick a random move
     if len(moves) > 0:
-        # Convert UCI format 'e2e4' to tuple ('e2', 'e4')
-        first_move = moves[0]
-        source = first_move[:2]  # First 2 characters
-        target = first_move[2:4]  # Next 2 characters
-        return (source, target)
+        randomMove = moves[random.randint(0, len(moves) - 1)]
+        return (randomMove[:2], randomMove[2:4])
 
     return None  # No legal moves available
 

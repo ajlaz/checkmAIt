@@ -4,72 +4,102 @@
   align-items: center;
   min-height: 100vh;
   min-width: 85vw;
+  background: var(--bg-primary);
+  padding: var(--spacing-xl);
 }
 
 .auth-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: var(--bg-secondary);
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
 }
 
 .auth-card h2 {
-  margin-bottom: 1.5rem;
-  color: #333;
+  margin-bottom: var(--spacing-xl);
+  color: var(--text-primary);
   text-align: center;
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
 }
 
 .auth-card form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--spacing-lg);
 }
 
 .auth-card input {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   font-size: 1rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: border-color 0.2s ease;
+}
+
+.auth-card input::placeholder {
+  color: var(--text-tertiary);
 }
 
 .auth-card input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--accent-red);
 }
 
 .auth-card button[type="submit"] {
-  padding: 0.75rem;
-  background: #667eea;
-  color: white;
+  padding: var(--spacing-md);
+  background: var(--accent-red);
+  color: var(--text-primary);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 .auth-card button[type="submit"]:hover:not(:disabled) {
-  background: #5568d3;
+  background: var(--accent-red-hover);
+  transform: scale(1.04);
+}
+
+.auth-card button[type="submit"]:active:not(:disabled) {
+  transform: scale(1);
 }
 
 .auth-card button[type="submit"]:disabled {
-  background: #ccc;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 .toggle-btn {
-  margin-top: 1rem;
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-xs);
   background: none;
   border: none;
-  color: #667eea;
+  color: var(--text-primary);
   cursor: pointer;
   text-decoration: underline;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.toggle-btn:hover {
+  color: var(--accent-red);
 }
 
 .error {
-  color: #e74c3c;
-  font-size: .875rem;
+  color: var(--accent-red);
+  font-size: 0.875rem;
   text-align: center;
+  margin-top: var(--spacing-xs);
+  font-weight: 500;
 }

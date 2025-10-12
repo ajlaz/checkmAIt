@@ -98,6 +98,44 @@ def turn():
     """
     return board.current_turn
 
+def get_board_after_move(current_board, move):
+    """
+    Simulate a move and get the resulting board state.
+    This allows you to look ahead and analyze positions after potential moves.
+
+    Args:
+        current_board: The current board object
+        move (tuple or str): The move to simulate, either as:
+            - A tuple: ('e2', 'e4') for source and target squares
+            - A string: 'e2e4' in UCI notation
+
+    Returns:
+        MockBoard: A new board object representing the position after the move
+
+    Example:
+        # Check if a move puts opponent in check
+        moves = legal_moves()
+        if moves:
+            test_move = moves[0][:2], moves[0][2:4]  # Convert 'e2e4' to ('e2', 'e4')
+            future_board = get_board_after_move(board, test_move)
+            if future_board.is_check():
+                print("This move gives check!")
+    """
+    # Convert move to UCI format if it's a tuple
+    if isinstance(move, tuple):
+        move_uci = move[0] + move[1]
+    else:
+        move_uci = move
+
+    # Validate the move is legal
+    legal = current_board.legal_moves()
+    if move_uci not in legal:
+        raise ValueError(f"Illegal move: {move_uci}. Legal moves: {legal}")
+
+    # This will be replaced by the actual board simulation code
+    # injected by the JavaScript bridge
+    return _simulate_move(current_board, move_uci)
+
 def get_available_functions():
     """List all available chess functions"""
     functions = [
@@ -109,6 +147,7 @@ def get_available_functions():
         "get_board() - Get board state as 2D array",
         "piece_at(square) - Get piece at specific square",
         "turn() - Get whose turn it is ('w' or 'b')",
+        "get_board_after_move(board, move) - Simulate a move and get resulting board",
         "get_available_functions() - List all available functions"
     ]
     for func in functions:

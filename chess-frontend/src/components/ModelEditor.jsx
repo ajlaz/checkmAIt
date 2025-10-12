@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -7,6 +8,9 @@ import {
   Text,
   useToast,
   Select,
+  Spinner,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/react';
 import { Editor } from '@monaco-editor/react';
 import { useAuth } from '../context/AuthContext';
@@ -15,6 +19,7 @@ import { PREDEFINED_FUNCTIONS } from '../utils/predefinedFunctions';
 import { getTestCode, validateBotCode } from '../utils/chessBridge';
 import { TEST_POSITIONS, DEFAULT_TEST_POSITION } from '../utils/testPositions';
 import { executeCode, createModel, updateModel } from '../services/api';
+import { initPyodide, isPyodideReady } from '../services/pyodideService';
 
 function ModelEditor({ onModelSaved, onCancel, existingModel, isEditing }) {
   const { user } = useAuth();
@@ -31,7 +36,28 @@ function ModelEditor({ onModelSaved, onCancel, existingModel, isEditing }) {
   // Still need saving state for tracking API calls
   const [isSaving, setIsSaving] = useState(false);
 
+  // Pyodide loading state
+  const [pyodideLoading, setPyodideLoading] = useState(true);
+  const [pyodideError, setPyodideError] = useState(null);
+
   const language = 'python';
+
+  // Pre-initialize Pyodide when component mounts
+  useEffect(() => {
+    const loadPyodide = async () => {
+      try {
+        setPyodideLoading(true);
+        await initPyodide();
+        setPyodideLoading(false);
+      } catch (error) {
+        console.error('Failed to initialize Pyodide:', error);
+        setPyodideError('Failed to load Python environment. Please refresh the page.');
+        setPyodideLoading(false);
+      }
+    };
+
+    loadPyodide();
+  }, []);
 
   // Load existing model code if we're editing
   useEffect(() => {
@@ -217,6 +243,20 @@ function ModelEditor({ onModelSaved, onCancel, existingModel, isEditing }) {
         <Text fontSize="sm" color="gray.400">
           Write your chess bot by implementing the getMove() function. Test it with different positions before saving.
         </Text>
+
+        {/* Pyodide Loading/Error States */}
+        {pyodideLoading && (
+          <Alert status="info" bg="#181818" borderColor="#333" border="1px solid">
+            <Spinner size="sm" mr={3} />
+            <Text color="white">Loading Python environment (first time may take 10-15 seconds)...</Text>
+          </Alert>
+        )}
+        {pyodideError && (
+          <Alert status="error">
+            <AlertIcon />
+            {pyodideError}
+          </Alert>
+        )}
       </VStack>
 
       <HStack spacing={4} align="start">
@@ -276,8 +316,9 @@ function ModelEditor({ onModelSaved, onCancel, existingModel, isEditing }) {
                 isLoading={isLoading}
                 onClick={testBot}
                 width="100%"
+                isDisabled={pyodideLoading}
               >
-                Test Bot
+                {pyodideLoading ? 'Loading Python...' : 'Test Bot'}
               </Button>
             </Box>
 
