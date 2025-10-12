@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import gameSocket from '../services/gameSocket';
 import { getBotMove } from '../utils/botRunner';
+import { updateRatings } from '../services/api';
 import './ChessBoard.css';
 
 function ChessBoard({ gameData, onGameEnd, botCode }) {
@@ -141,9 +142,42 @@ function ChessBoard({ gameData, onGameEnd, botCode }) {
     return () => clearInterval(interval);
   }, [chessPosition, currentTurn, gameData.playerColor, botCode, gameOver]);
 
-  const handleGameOver = (result) => {
+  const handleGameOver = async (result) => {
     setGameOver(true);
     setGameResult(result);
+
+    // Only update ratings if we have valid game data with model IDs
+    console.log('Game over with result:', result);
+    console.log('Game data:', gameData);
+
+    if (gameData.modelId && gameData.opponentModelId) {
+      try {
+        // Determine winner and loser based on game result
+        let winnerId, loserId, isDraw = false;
+
+        if (result.winner === 'draw') {
+          // For draws, order doesn't matter, but we still need both IDs
+          isDraw = true;
+          winnerId = gameData.modelId;
+          loserId = gameData.opponentModelId;
+        } else if (result.winner === gameData.playerColor) {
+          // Our model won
+          winnerId = gameData.modelId;
+          loserId = gameData.opponentModelId;
+        } else {
+          // Opponent model won
+          winnerId = gameData.opponentModelId;
+          loserId = gameData.modelId;
+        }
+
+        console.log(`Updating ratings: ${winnerId} vs ${loserId}, isDraw: ${isDraw}`);
+        await updateRatings(winnerId, loserId, isDraw);
+        console.log('Ratings updated successfully');
+      } catch (error) {
+        console.error('Failed to update ratings:', error);
+      }
+    }
+
     setTimeout(() => {
       onGameEnd();
     }, 5000);

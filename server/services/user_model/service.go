@@ -12,6 +12,8 @@ type ServiceInterface interface {
 	GetModelsByUserID(userID int) ([]*model.UserModel, error)
 	UpdateModel(modelID int, name, modelCode string) (*model.UserModel, error)
 	DeleteModel(modelID int) error
+	UpdateRating(winnerID, loserID int) (*model.UserModel, *model.UserModel, error)
+	UpdateRatingDraw(modelAID, modelBID int) (*model.UserModel, *model.UserModel, error)
 }
 
 // Service implements the user model service

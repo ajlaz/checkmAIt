@@ -71,6 +71,16 @@ export const leaveMatchmakingQueue = async () => {
   return response.data;
 };
 
+// Rating APIs
+export const updateRatings = async (winnerId, loserId, isDraw = false) => {
+  const response = await api.put('/models/rating', {
+    winner_id: winnerId,
+    loser_id: loserId,
+    is_draw: isDraw
+  });
+  return response.data;
+};
+
 // Local Python execution using Pyodide
 import { executePythonCode } from './pyodideService';
 

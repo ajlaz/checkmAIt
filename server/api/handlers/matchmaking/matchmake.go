@@ -12,12 +12,13 @@ type JoinQueueRequest struct {
 }
 
 type QueueStatusResponse struct {
-	Status        string `json:"status"` // "queued", "matched"
-	QueuePosition int    `json:"queuePosition,omitempty"`
-	GameID        string `json:"gameId,omitempty"`
-	WSPort        int    `json:"wsPort,omitempty"`
-	MatchID       string `json:"matchId,omitempty"`
-	PlayerColor   string `json:"playerColor,omitempty"` // "white" or "black"
+	Status          string `json:"status"` // "queued", "matched"
+	QueuePosition   int    `json:"queuePosition,omitempty"`
+	GameID          string `json:"gameId,omitempty"`
+	WSPort          int    `json:"wsPort,omitempty"`
+	MatchID         string `json:"matchId,omitempty"`
+	PlayerColor     string `json:"playerColor,omitempty"`     // "white" or "black"
+	OpponentModelID int    `json:"opponentModelId,omitempty"` // Added for rating updates
 }
 
 func (h *Handler) JoinQueue(c *gin.Context) {
@@ -81,18 +82,26 @@ func (h *Handler) JoinQueue(c *gin.Context) {
 	}
 
 	// User was matched immediately
-	// Determine player color
+	// Determine player color and opponent model ID
 	playerColor := "white"
+	var opponentModelID int
+
 	if match.BlackPlayer == userID {
 		playerColor = "black"
+		// If we're black, the opponent is white (player1)
+		opponentModelID = match.Player1.ModelID
+	} else {
+		// If we're white, the opponent is black (player2)
+		opponentModelID = match.Player2.ModelID
 	}
 
 	c.JSON(http.StatusOK, QueueStatusResponse{
-		Status:      "matched",
-		GameID:      match.GameID,
-		WSPort:      match.WSPort,
-		MatchID:     match.ID,
-		PlayerColor: playerColor,
+		Status:          "matched",
+		GameID:          match.GameID,
+		WSPort:          match.WSPort,
+		MatchID:         match.ID,
+		PlayerColor:     playerColor,
+		OpponentModelID: opponentModelID,
 	})
 }
 
@@ -188,18 +197,26 @@ func (h *Handler) GetQueueStatus(c *gin.Context) {
 
 	// If match exists, return match details
 	if match != nil {
-		// Determine player color
+		// Determine player color and opponent model ID
 		playerColor := "white"
+		var opponentModelID int
+
 		if match.BlackPlayer == userID {
 			playerColor = "black"
+			// If we're black, the opponent is white (player1)
+			opponentModelID = match.Player1.ModelID
+		} else {
+			// If we're white, the opponent is black (player2)
+			opponentModelID = match.Player2.ModelID
 		}
 
 		c.JSON(http.StatusOK, QueueStatusResponse{
-			Status:      "matched",
-			GameID:      match.GameID,
-			WSPort:      match.WSPort,
-			MatchID:     match.ID,
-			PlayerColor: playerColor,
+			Status:          "matched",
+			GameID:          match.GameID,
+			WSPort:          match.WSPort,
+			MatchID:         match.ID,
+			PlayerColor:     playerColor,
+			OpponentModelID: opponentModelID,
 		})
 		return
 	}

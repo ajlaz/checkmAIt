@@ -22,7 +22,14 @@ function App() {
   };
 
   const handleMatchFound = async (matchData) => {
-    setGameData(matchData);
+    // Include the selected model ID in the game data
+    const gameDataWithModel = {
+      ...matchData,
+      modelId: selectedModel,
+      opponentModelId: matchData.opponentModelId || null  // Will be set if available from backend
+    };
+
+    setGameData(gameDataWithModel);
     setIsLoadingModel(true);
 
     try {

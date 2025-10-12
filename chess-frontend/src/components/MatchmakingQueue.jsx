@@ -66,6 +66,8 @@ function MatchmakingQueue({ modelId, onMatchFound, onCancel }) {
         gameId: matchData.gameId,
         wsPort: matchData.wsPort,
         playerColor: matchData.playerColor,
+        // Include the opponent model ID if it's provided by the server
+        opponentModelId: matchData.opponentModelId || null
       });
     }, 1500);
   };

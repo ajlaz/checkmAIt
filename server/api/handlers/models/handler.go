@@ -34,7 +34,8 @@ func (h *Handler) registerRoutes() {
 	{
 		modelGroup.GET("/:id", h.GetModelByID)
 		modelGroup.GET("/user/:userId", h.GetModelsByUserID)
-		modelGroup.POST("", h.CreateModel)    
-		modelGroup.PUT("/:id", h.UpdateModel) 
+		modelGroup.POST("", h.CreateModel)
+		modelGroup.PUT("/:id", h.UpdateModel)
+		modelGroup.PUT("/rating", h.UpdateRating) // Rating update endpoint
 	}
 }
