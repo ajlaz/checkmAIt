@@ -19,8 +19,7 @@ checkmAIt is a platform designed to help computer science students and chess ent
 - **Secure Python Execution**: Run Python code safely using Pyodide (Python compiled to WebAssembly)
 
 ## Demo
-
-https://github.com/user-attachments/assets/your-demo-video
+Check out our Devpost for a full demo video [here!](https://devpost.com/software/checkmait)
 
 [Download Demo Video](./demo.mp4)
 
@@ -41,7 +40,6 @@ https://github.com/user-attachments/assets/your-demo-video
 - **Gin** - HTTP web framework
 - **JWT** - Authentication tokens
 - **PostgreSQL** - Primary database
-- **GORM** - ORM for database operations
 
 ### Chess Engine
 - **Node.js/TypeScript** - Runtime and language
