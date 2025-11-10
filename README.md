@@ -1,7 +1,7 @@
 # checkmAIt
 > Chess.com meets LeetCode. Test your chess AI models without the hassle.
 
-🏆 We're pleased to announce that checkmAIt was selected as the BostonHacks 2025 Upgrade.exe track winner! 🏆
+🏆 We're pleased to announce that checkmAIt was selected as the BostonHacks 2025 Upgrade.exe track winner!
 
 
 ## Overview
