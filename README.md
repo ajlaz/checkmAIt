@@ -88,7 +88,7 @@ Check out our Devpost for a full demo video [here!](https://devpost.com/software
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/checkmAIt.git
+git clone https://github.com/ajlaz/checkmAIt.git
 cd checkmAIt
 ```
 
